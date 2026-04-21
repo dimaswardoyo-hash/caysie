@@ -31,20 +31,34 @@
             <div class="hidden md:flex items-center gap-5">
                 @auth
                     {{-- Sudah login → ke dashboard --}}
-                    <a href="#" class="text-gray-600 hover:text-primary transition">
-                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    {{-- Keranjang --}}
+                    <a href="{{ route('user.cart') }}" class="relative">
+                        <div class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-100 transition">
+                            <i class="fa-solid fa-cart-shopping text-gray-600 text-lg"></i>
+                        </div>
+                        @if (isset($cartCount) && $cartCount > 0)
+                            <span
+                                class="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-black rounded-full flex items-center justify-center">
+                                {{ $cartCount > 9 ? '9+' : $cartCount }}
+                            </span>
+                        @endif
                     </a>
+                    {{-- Avatar --}}
                     <div class="flex items-center gap-2">
                         <div
-                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            class="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white text-sm font-black">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
-                        <span class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</span>
+                        <span class="hidden md:block text-sm font-semibold text-gray-700 max-w-28 truncate">
+                            {{ auth()->user()->name }}
+                        </span>
                     </div>
+                    {{-- Logout --}}
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="text-sm text-gray-500 hover:text-red-500 transition">
-                            <i class="fa-solid fa-right-from-bracket"></i>
+                        <button
+                            class="text-gray-400 hover:text-red-500 transition w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50">
+                            <i class="fa-solid fa-right-from-bracket text-sm"></i>
                         </button>
                     </form>
                 @else

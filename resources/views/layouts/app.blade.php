@@ -72,7 +72,24 @@
 
     {{-- ===================== NAVBAR ===================== --}}
     @include('components.navbar')
-
+    {{-- Flash Messages --}}
+    @if (session('success'))
+        <div class="max-w-7xl mx-auto px-6 pt-4">
+            <div
+                class="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-3.5 rounded-2xl">
+                <i class="fa-solid fa-circle-check text-green-500"></i>
+                <span class="text-sm font-semibold">{{ session('success') }}</span>
+            </div>
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="max-w-7xl mx-auto px-6 pt-4">
+            <div class="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 px-5 py-3.5 rounded-2xl">
+                <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+                <span class="text-sm font-semibold">{{ session('error') }}</span>
+            </div>
+        </div>
+    @endif
     {{-- Content --}}
     @yield('content')
 
