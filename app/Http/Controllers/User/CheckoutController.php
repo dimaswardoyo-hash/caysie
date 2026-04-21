@@ -82,6 +82,7 @@ class CheckoutController extends Controller
                 'total' => $total,
                 'status' => 'pending',
                 'notes' => $request->notes,
+                'payment_deadline' => now()->addHours(24), // ← TAMBAHKAN INI
             ]);
 
             foreach ($carts as $cart) {

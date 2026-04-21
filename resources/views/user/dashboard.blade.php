@@ -4,106 +4,201 @@
 @section('content')
 
     {{-- ========== HERO ========== --}}
-    <section class="bg-gradient-to-br from-[#6C63FF] via-[#5a52e0] to-[#3730a3] text-white overflow-hidden">
-        <div class="max-w-7xl mx-auto px-6 py-24 relative">
-            {{-- Dekor lingkaran --}}
-            <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
-            <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-16 -translate-x-16"></div>
+    @guest
+        <section class="bg-gradient-to-br from-[#6C63FF] via-[#5a52e0] to-[#3730a3] text-white overflow-hidden">
+            <div class="max-w-7xl mx-auto px-6 py-24 relative">
+                {{-- Dekor lingkaran --}}
+                <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-16 -translate-x-16"></div>
 
-            <div class="relative z-10 max-w-2xl">
-                <span
-                    class="inline-block bg-white/20 backdrop-blur text-white text-xs font-bold px-4 py-2 rounded-full mb-6 tracking-wider">
-                    ✦ FASHION ANAK MUDA GUNUNGKIDUL
-                </span>
-                <h1 class="text-5xl md:text-6xl font-black leading-tight mb-6">
-                    Tampil Keren,<br>
-                    <span class="text-purple-200">Harga Bersahabat</span>
-                </h1>
-                <p class="text-lg text-purple-100 mb-10 leading-relaxed max-w-lg">
-                    Koleksi kaos & celana terkini untuk anak muda. Kualitas premium, style yang selalu up-to-date langsung
-                    dari Gunungkidul.
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="#produk"
-                        class="inline-flex items-center gap-2 bg-white text-primary font-bold px-8 py-4 rounded-2xl hover:bg-purple-50 transition shadow-xl shadow-purple-900/30 text-sm">
-                        Belanja Sekarang <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                    <a href="{{ route('register') }}"
-                        class="inline-flex items-center gap-2 bg-white/15 backdrop-blur text-white font-bold px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/25 transition text-sm">
-                        Daftar Gratis <i class="fa-solid fa-user-plus"></i>
-                    </a>
-                </div>
+                <div class="relative z-10 max-w-2xl">
+                    <span
+                        class="inline-block bg-white/20 backdrop-blur text-white text-xs font-bold px-4 py-2 rounded-full mb-6 tracking-wider">
+                        ✦ FASHION ANAK MUDA GUNUNGKIDUL
+                    </span>
+                    <h1 class="text-5xl md:text-6xl font-black leading-tight mb-6">
+                        Tampil Keren,<br>
+                        <span class="text-purple-200">Harga Bersahabat</span>
+                    </h1>
+                    <p class="text-lg text-purple-100 mb-10 leading-relaxed max-w-lg">
+                        Koleksi kaos & celana terkini untuk anak muda. Kualitas premium, style yang selalu up-to-date langsung
+                        dari Gunungkidul.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#produk"
+                            class="inline-flex items-center gap-2 bg-white text-primary font-bold px-8 py-4 rounded-2xl hover:bg-purple-50 transition shadow-xl shadow-purple-900/30 text-sm">
+                            Belanja Sekarang <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                        <a href="{{ route('register') }}"
+                            class="inline-flex items-center gap-2 bg-white/15 backdrop-blur text-white font-bold px-8 py-4 rounded-2xl border border-white/30 hover:bg-white/25 transition text-sm">
+                            Daftar Gratis <i class="fa-solid fa-user-plus"></i>
+                        </a>
+                    </div>
 
-                {{-- Stats --}}
-                <div class="flex flex-wrap gap-8 mt-14">
-                    <div>
-                        <p class="text-3xl font-black">500+</p>
-                        <p class="text-purple-200 text-sm mt-1">Produk Terjual</p>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div>
-                        <p class="text-3xl font-black">200+</p>
-                        <p class="text-purple-200 text-sm mt-1">Pelanggan Puas</p>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div>
-                        <p class="text-3xl font-black">4.9★</p>
-                        <p class="text-purple-200 text-sm mt-1">Rating Toko</p>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div>
-                        <p class="text-3xl font-black">2 Thn</p>
-                        <p class="text-purple-200 text-sm mt-1">Berpengalaman</p>
+                    {{-- Stats --}}
+                    <div class="flex flex-wrap gap-8 mt-14">
+                        <div>
+                            <p class="text-3xl font-black">500+</p>
+                            <p class="text-purple-200 text-sm mt-1">Produk Terjual</p>
+                        </div>
+                        <div class="w-px bg-white/20"></div>
+                        <div>
+                            <p class="text-3xl font-black">200+</p>
+                            <p class="text-purple-200 text-sm mt-1">Pelanggan Puas</p>
+                        </div>
+                        <div class="w-px bg-white/20"></div>
+                        <div>
+                            <p class="text-3xl font-black">4.9★</p>
+                            <p class="text-purple-200 text-sm mt-1">Rating Toko</p>
+                        </div>
+                        <div class="w-px bg-white/20"></div>
+                        <div>
+                            <p class="text-3xl font-black">2 Thn</p>
+                            <p class="text-purple-200 text-sm mt-1">Berpengalaman</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </section>
+    @endguest
+
+    @auth
+        {{-- Welcome Banner --}}
+        <section class="py-4">
+            <div class="max-w-7xl mx-auto px-6">
+                <div
+                    class="bg-gradient-to-br from-primary to-indigo-700 rounded-3xl p-8 mb-8 text-white relative overflow-hidden">
+                    <div class="absolute -right-12 -top-12 w-56 h-56 bg-white/10 rounded-full"></div>
+                    <div class="absolute right-10 -bottom-10 w-36 h-36 bg-white/5 rounded-full"></div>
+                    <div class="relative z-10 flex items-center justify-between flex-wrap gap-6">
+                        <div>
+                            <p class="text-purple-200 text-sm mb-1">👋 Selamat datang,</p>
+                            <h1 class="text-3xl font-black mb-2">{{ auth()->user()->name }}</h1>
+                            <p class="text-purple-200 text-sm">Temukan koleksi fashion terbaru Caysie buat kamu!</p>
+
+                            <div class="flex gap-3 mt-5">
+                                <a href="{{ route('user.shop') }}"
+                                    class="bg-white text-primary font-black px-6 py-2.5 rounded-xl text-sm hover:bg-purple-50 transition shadow-lg">
+                                    Belanja Sekarang
+                                </a>
+                                <a href="{{ route('user.orders') }}"
+                                    class="bg-white/20 text-white font-bold px-6 py-2.5 rounded-xl text-sm border border-white/30 hover:bg-white/30 transition">
+                                    Pesanan Saya
+                                </a>
+                            </div>
+                        </div>
+                        <div class="text-8xl opacity-80">🛍️</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    @endauth
+
+    {{-- Kategori --}}
+    <section class="py-6 md:py-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl md:text-2xl font-black text-gray-800">
+                    Kategori
+                </h2>
+
+                <a href="{{ route('user.shop') }}"
+                    class="flex items-center gap-1 text-sm font-bold text-primary 
+                       hover:gap-2 transition-all group">
+                    Lihat semua
+                    <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition"></i>
+                </a>
+            </div>
+
+            {{-- Grid --}}
+            <div class="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+
+                @foreach ([['kaos', '👕', 'purple'], ['celana', '👖', 'orange'], ['jaket', '🧥', 'emerald'], ['aksesoris', '🧢', 'yellow']] as [$cat, $ico, $c])
+                    <a href="{{ route('user.shop', ['category' => $cat]) }}"
+                        class="group bg-white rounded-2xl py-6 px-4 text-center 
+                           border border-gray-100 shadow-sm
+                           hover:shadow-lg hover:border-{{ $c }}-200
+                           hover:-translate-y-1 
+                           transition-all duration-300 ease-out">
+
+                        <div class="text-4xl mb-3 transform group-hover:scale-110 transition">
+                            {{ $ico }}
+                        </div>
+
+                        <p
+                            class="font-bold text-gray-700 text-sm capitalize 
+                              group-hover:text-{{ $c }}-600 transition">
+                            {{ $cat }}
+                        </p>
+
+                    </a>
+                @endforeach
+
+            </div>
+
         </div>
     </section>
 
-    {{-- Kategori --}}
-    <div class="mb-8">
-        <h2 class="text-xl font-black text-gray-800 mb-4">Kategori</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            @foreach ([['kaos', '👕', 'purple'], ['celana', '👖', 'orange'], ['jaket', '🧥', 'emerald'], ['aksesoris', '🧢', 'yellow']] as [$cat, $ico, $c])
-                <a href="{{ route('user.shop', ['category' => $cat]) }}"
-                    class="bg-white rounded-2xl p-5 text-center border border-gray-100 hover:border-{{ $c }}-300 hover:shadow-md transition group card-hover">
-                    <div class="text-4xl mb-3">{{ $ico }}</div>
-                    <p
-                        class="font-bold text-gray-700 text-sm group-hover:text-{{ $c }}-600 transition capitalize">
-                        {{ $cat }}</p>
-                </a>
-            @endforeach
-        </div>
-    </div>
-
     {{-- Produk Unggulan --}}
     @if ($featured->count())
-        <div class="mb-8">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-black text-gray-800">⭐ Produk Unggulan</h2>
-                <a href="{{ route('user.shop') }}" class="text-sm text-primary font-semibold hover:underline">Lihat semua
-                    →</a>
+        <section class="py-6 md:py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                {{-- Header --}}
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-black text-gray-800">
+                        ⭐ Produk Unggulan
+                    </h2>
+
+                    <a href="{{ route('user.shop') }}"
+                        class="flex items-center gap-1 text-sm font-bold text-primary 
+                           hover:gap-2 transition-all group">
+                        Lihat semua
+                        <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition"></i>
+                    </a>
+                </div>
+
+                {{-- Grid --}}
+                <div class="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                    @foreach ($featured as $product)
+                        @include('user.partials.product-card', ['product' => $product])
+                    @endforeach
+                </div>
+
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-                @foreach ($featured as $product)
+        </section>
+    @endif
+
+
+    {{-- Produk Terbaru --}}
+    <section class="py-6 md:py-8 id="produk">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl md:text-2xl font-black text-gray-800">
+                    🔥 Produk Terbaru
+                </h2>
+
+                <a href="{{ route('user.shop') }}"
+                    class="flex items-center gap-1 text-sm font-bold text-primary 
+                       hover:gap-2 transition-all group">
+                    Lihat semua
+                    <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition"></i>
+                </a>
+            </div>
+
+            {{-- Grid --}}
+            <div class="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                @foreach ($newArrivals as $product)
                     @include('user.partials.product-card', ['product' => $product])
                 @endforeach
             </div>
-        </div>
-    @endif
 
-    {{-- Terbaru --}}
-    <div>
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-black text-gray-800">🔥 Produk Terbaru</h2>
-            <a href="{{ route('user.shop') }}" class="text-sm text-primary font-semibold hover:underline">Lihat semua →</a>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-            @foreach ($newArrivals as $product)
-                @include('user.partials.product-card', ['product' => $product])
-            @endforeach
-        </div>
-    </div>
+    </section>
 
     {{-- ========== BANNER PROMO ========== --}}
     <section class="py-4 bg-white">

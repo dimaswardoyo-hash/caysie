@@ -42,27 +42,68 @@
             box-shadow: 0 16px 40px rgba(108, 99, 255, .15);
         }
 
-        .nav-link {
+        /* Dropdown */
+        .nav-dropdown {
             position: relative;
         }
 
-        .nav-link::after {
-            content: '';
+        .nav-dropdown-menu {
+            display: none;
             position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #6C63FF;
-            transition: .3s;
+            top: calc(100% + 12px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 20px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+            width: 360px;
+            z-index: 9999;
+            overflow: hidden;
         }
 
-        .nav-link:hover::after {
-            width: 100%;
+        .nav-dropdown.active .nav-dropdown-menu {
+            display: block;
         }
 
-        html {
-            scroll-behavior: smooth;
+        /* Animasi dropdown */
+        .nav-dropdown.active .nav-dropdown-menu {
+            animation: dropIn .2s ease;
+        }
+
+        @keyframes dropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Profile dropdown */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+            width: 220px;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .profile-dropdown.active .profile-dropdown-menu {
+            display: block;
+            animation: dropIn .2s ease;
         }
     </style>
     @stack('styles')
@@ -95,6 +136,67 @@
 
     {{-- ===================== FOOTER ===================== --}}
     @include('components.footer')
+    <script>
+        // ── Toggle Dropdown ──────────────────────────────────────
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const all = document.querySelectorAll('.nav-dropdown, .profile-dropdown');
+            all.forEach(d => {
+                if (d.id !== id) d.classList.remove('active');
+            });
+            el.classList.toggle('active');
+        }
+
+        // Tutup semua dropdown saat klik di luar
+        document.addEventListener('click', e => {
+            const dropdowns = document.querySelectorAll('.nav-dropdown, .profile-dropdown');
+            dropdowns.forEach(d => {
+                if (!d.contains(e.target)) d.classList.remove('active');
+            });
+        });
+
+        // ── Mobile Menu ──────────────────────────────────────────
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            menu.classList.toggle('hidden');
+            icon.className = menu.classList.contains('hidden') ?
+                'fa-solid fa-bars text-gray-600' :
+                'fa-solid fa-xmark text-gray-600';
+        }
+
+        // ── Countdown Timer di Navbar Dropdown ───────────────────
+        document.querySelectorAll('.navbar-countdown').forEach(el => {
+            let secs = parseInt(el.dataset.seconds ?? 0);
+            if (secs <= 0) return;
+
+            const tick = setInterval(() => {
+                secs--;
+                if (secs <= 0) {
+                    clearInterval(tick);
+                    el.textContent = '00:00:00';
+                    el.classList.add('text-red-600');
+                    return;
+                }
+                const h = Math.floor(secs / 3600);
+                const m = Math.floor((secs % 3600) / 60);
+                const s = secs % 60;
+                el.textContent =
+                    `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                if (secs < 3600) el.classList.add('text-red-600');
+            }, 1000);
+        });
+
+        // ── Auto-dismiss flash message ────────────────────────────
+        setTimeout(() => {
+            document.querySelectorAll('[class*="bg-green-50"], [class*="bg-red-50"]').forEach(el => {
+                if (el.closest('nav, footer')) return;
+                el.style.transition = 'opacity .5s';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+    </script>
 
     @stack('scripts')
 </body>
