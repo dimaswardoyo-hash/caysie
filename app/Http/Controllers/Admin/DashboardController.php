@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Product;
 
 class DashboardController extends Controller
 {
@@ -12,7 +13,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_users' => User::where('role', 'user')->count(),
-            'total_products' => 0, // akan diisi di step berikutnya
+            'total_products' => Product::count(),
             'total_orders' => 0,
             'total_revenue' => 0,
         ];

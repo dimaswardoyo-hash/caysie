@@ -71,8 +71,9 @@
                     <span>Dashboard</span>
                 </a>
 
-                <a href="#"
-                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                <a href="{{ route('admin.products.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}
+          flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
                     <i class="fa-solid fa-box-open w-5"></i>
                     <span>Produk</span>
                 </a>
