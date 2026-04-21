@@ -10,6 +10,9 @@ use App\Http\Controllers\User\ShopController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\OrderController;
+use App\Http\Controllers\Admin\OrderController as AdminOrder;
+use App\Http\Controllers\Admin\RevenueController as AdminRevenue;
+use App\Http\Controllers\Admin\UserController as AdminUser;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,10 +33,24 @@ Route::prefix('admin')
     ->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
-        // CRUD Produk
+        // Manage Produk
         Route::resource('products', ProductController::class);
         Route::delete('products/{product}/images', [ProductController::class, 'deleteImage'])->name('products.delete-image');
         Route::patch('products/{product}/toggle', [ProductController::class, 'toggleStatus'])->name('products.toggle');
+
+        // Manage Pesanan
+        Route::get('orders', [AdminOrder::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [AdminOrder::class, 'show'])->name('orders.show');
+        Route::patch('orders/{order}/status', [AdminOrder::class, 'updateStatus'])->name('orders.status');
+        Route::patch('orders/{order}/confirm-payment', [AdminOrder::class, 'confirmPayment'])->name('orders.confirm');
+
+        // Manage Pemasukan
+        Route::get('revenue', [AdminRevenue::class, 'index'])->name('revenue.index');
+
+        // Manage User
+        Route::get('users', [AdminUser::class, 'index'])->name('users.index');
+        Route::get('users/{user}', [AdminUser::class, 'show'])->name('users.show');
+        Route::patch('users/{user}/toggle-ban', [AdminUser::class, 'toggleBan'])->name('users.toggle-ban');
     });
 
 // ===== USER ROUTES =====

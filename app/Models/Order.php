@@ -42,4 +42,14 @@ class Order extends Model
             'cancelled' => 'red',
         ][$this->status] ?? 'gray';
     }
+
+    public function getFormattedTotalAttribute(): string
+    {
+        return 'Rp' . number_format($this->total, 0, ',', '.');
+    }
+
+    public function getFormattedSubtotalAttribute(): string
+    {
+        return 'Rp' . number_format($this->subtotal, 0, ',', '.');
+    }
 }

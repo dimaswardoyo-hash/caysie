@@ -66,34 +66,40 @@
 
                 <a href="{{ route('admin.dashboard') }}"
                     class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}
-                      flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
-                    <i class="fa-solid fa-gauge-high w-5"></i>
-                    <span>Dashboard</span>
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-gauge-high w-5"></i><span>Dashboard</span>
                 </a>
 
                 <a href="{{ route('admin.products.index') }}"
                     class="sidebar-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}
-          flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
-                    <i class="fa-solid fa-box-open w-5"></i>
-                    <span>Produk</span>
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-box-open w-5"></i><span>Produk</span>
                 </a>
 
-                <a href="#"
-                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                <a href="{{ route('admin.orders.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
                     <i class="fa-solid fa-receipt w-5"></i>
                     <span>Pesanan</span>
+                    @php $pending = \App\Models\Order::where('status','pending')->count(); @endphp
+                    @if ($pending > 0)
+                        <span
+                            class="ml-auto bg-red-500 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center">
+                            {{ $pending > 9 ? '9+' : $pending }}
+                        </span>
+                    @endif
                 </a>
 
-                <a href="#"
-                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
-                    <i class="fa-solid fa-chart-line w-5"></i>
-                    <span>Pemasukan</span>
+                <a href="{{ route('admin.revenue.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.revenue.*') ? 'active' : '' }}
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-chart-line w-5"></i><span>Pemasukan</span>
                 </a>
 
-                <a href="#"
-                    class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
-                    <i class="fa-solid fa-users w-5"></i>
-                    <span>Kelola User</span>
+                <a href="{{ route('admin.users.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-users w-5"></i><span>Kelola User</span>
                 </a>
             </nav>
 
