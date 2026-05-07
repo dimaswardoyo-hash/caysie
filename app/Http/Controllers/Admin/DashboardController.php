@@ -16,7 +16,7 @@ class DashboardController extends Controller
             'total_users' => User::where('role', 'user')->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
-            'total_revenue' => Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])->sum('total'),
+            // 'total_revenue' => Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])->sum('total'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'paid_orders' => Order::where('status', 'paid')->count(),
         ];

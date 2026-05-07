@@ -3,93 +3,106 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Order extends Model
 {
-    protected $fillable = ['order_code', 'user_id', 'receiver_name', 'receiver_phone', 'receiver_address', 'receiver_province', 'receiver_city', 'receiver_postal_code', 'courier_name', 'courier_service', 'shipping_cost', 'shipping_estimate', 'subtotal', 'total', 'status', 'payment_method', 'payment_proof', 'paid_at', 'notes', 'cancelled_at', 'cancel_reason', 'cancelled_by', 'payment_deadline'];
+    use HasFactory;
 
-    protected $casts = [
-        'paid_at' => 'datetime',
-        'cancelled_at' => 'datetime',
-        'payment_deadline' => 'datetime',
+    protected $fillable = [
+        'user_id',
+        'order_number',
+        'status',
+
+        // Penerima
+        'receiver_name',
+        'receiver_phone',
+        'receiver_address',
+        'receiver_province',
+        'receiver_city',
+        'receiver_district',
+        'receiver_village',
+        'receiver_postal_code',
+
+        // Kurir
+        'courier_code',
+        'courier_name',
+        'courier_service',
+        'shipping_cost',
+        'shipping_estimate',
+        'tracking_number',
+
+        // Keuangan
+        'subtotal',
+        'total_amount',
+
+        // Pembayaran
+        'payment_proof',
+        'paid_at',
+
+        'notes',
     ];
 
+    protected $casts = [
+        'shipping_cost' => 'integer',
+        'subtotal' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'paid_at' => 'datetime',
+    ];
+
+    // ── Relasi ───────────────────────────────────────────────
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    // ── Accessor ─────────────────────────────────────────────
+    public function getFormattedTotalAttribute(): string
+    {
+        return 'Rp' . number_format((float) $this->total_amount, 0, ',', '.');
+    }
+
+    public function getFormattedShippingAttribute(): string
+    {
+        return 'Rp' . number_format((float) $this->shipping_cost, 0, ',', '.');
+    }
+
     public function getStatusLabelAttribute(): string
     {
-        return [
+        return match ($this->status) {
             'pending' => 'Menunggu Pembayaran',
-            'paid' => 'Sudah Dibayar',
+            'waiting_confirmation' => 'Menunggu Konfirmasi',
+            'confirmed' => 'Dikonfirmasi',
             'processing' => 'Diproses',
             'shipped' => 'Dikirim',
             'delivered' => 'Selesai',
             'cancelled' => 'Dibatalkan',
-        ][$this->status] ?? $this->status;
+            default => ucfirst($this->status),
+        };
     }
 
     public function getStatusColorAttribute(): string
     {
-        return [
+        return match ($this->status) {
             'pending' => 'yellow',
-            'paid' => 'blue',
+            'waiting_confirmation' => 'blue',
+            'confirmed' => 'indigo',
             'processing' => 'purple',
-            'shipped' => 'indigo',
+            'shipped' => 'cyan',
             'delivered' => 'green',
             'cancelled' => 'red',
-        ][$this->status] ?? 'gray';
+            default => 'gray',
+        };
     }
 
-    public function getFormattedTotalAttribute(): string
+    // ── Scope ────────────────────────────────────────────────
+    public function scopeForUser($query, $userId)
     {
-        return 'Rp' . number_format($this->total, 0, ',', '.');
-    }
-
-    public function getFormattedSubtotalAttribute(): string
-    {
-        return 'Rp' . number_format($this->subtotal, 0, ',', '.');
-    }
-
-    public function getCanCancelAttribute(): bool
-    {
-        return in_array($this->status, ['pending', 'paid']) && $this->status !== 'cancelled';
-    }
-
-    // Apakah masih bisa upload bukti bayar?
-    public function getCanPayAttribute(): bool
-    {
-        return $this->status === 'pending' && !$this->isPaymentExpired();
-    }
-
-    public function isPaymentExpired(): bool
-    {
-        if (!$this->payment_deadline) {
-            return false;
-        }
-        return now()->isAfter($this->payment_deadline);
-    }
-
-    public function getPaymentSecondsLeftAttribute(): int
-    {
-        if (!$this->payment_deadline) {
-            return 0;
-        }
-        $diff = now()->diffInSeconds($this->payment_deadline, false);
-        return max(0, $diff);
-    }
-
-    public function getPaymentDeadlineLabelAttribute(): string
-    {
-        if (!$this->payment_deadline) {
-            return '-';
-        }
-        return $this->payment_deadline->isoFormat('D MMM Y, HH:mm') . ' WIB';
+        return $query->where('user_id', $userId);
     }
 }

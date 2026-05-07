@@ -12,32 +12,34 @@ return new class extends Migration {
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('order_code')->unique();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
-            // Identitas penerima
+            $table->string('order_number')->unique();
+            $table->enum('status', ['pending', 'waiting_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
+
+            // Penerima
             $table->string('receiver_name');
             $table->string('receiver_phone');
-            $table->text('receiver_address');
             $table->string('receiver_province');
             $table->string('receiver_city');
-            $table->string('receiver_postal_code');
+            $table->string('receiver_district')->nullable();
+            $table->string('receiver_village')->nullable();
+            $table->string('receiver_postal_code')->nullable();
+            $table->text('receiver_address');
 
-            // Pengiriman
-            $table->string('courier_name');
-            $table->string('courier_service');
-            $table->integer('shipping_cost');
-            $table->integer('shipping_estimate')->nullable()->comment('hari');
+            // Kurir — disimpan dari hasil cek ongkir
+            $table->string('courier_code'); // jne, jnt, sicepat, dst.
+            $table->string('courier_name'); // JNE, J&T Express, dst.
+            $table->string('courier_service'); // REG, OKE, YES, EZ, dst.
+            $table->unsignedInteger('shipping_cost')->default(0);
+            $table->string('shipping_estimate')->nullable(); // "2-3"
+            $table->string('tracking_number')->nullable(); // diisi admin saat shipped
 
-            // Total
-            $table->decimal('subtotal', 12, 2);
-            $table->decimal('total', 12, 2);
-
-            // Status
-            $table->enum('status', ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            // Keuangan
+            $table->decimal('subtotal', 12, 2)->default(0);
+            $table->decimal('total_amount', 12, 2)->default(0);
 
             // Pembayaran
-            $table->string('payment_method')->default('transfer');
             $table->string('payment_proof')->nullable();
             $table->timestamp('paid_at')->nullable();
 

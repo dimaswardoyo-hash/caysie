@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -13,6 +12,12 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+    ],
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
@@ -34,5 +39,18 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'binderbyte' => [
+        'api_key' => env('BINDERBYTE_API_KEY'),
+        'base_url' => env('BINDERBYTE_BASE_URL', 'https://api.binderbyte.com'),
+    ],
+    
+    'xendit' => [
+        'secret_key' => env('XENDIT_SECRET_KEY'),
+        'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
+    ],
 
+    'biteship' => [
+        'api_key' => env('BITESHIP_API_KEY'),
+        'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
+    ],
 ];
