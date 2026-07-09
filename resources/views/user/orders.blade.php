@@ -2,308 +2,322 @@
 @section('title', 'Riwayat Pesanan')
 
 @section('content')
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
 
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div>
-            <h1 class="text-2xl font-black text-gray-800">📋 Riwayat Pesanan</h1>
-            <p class="text-sm text-gray-400 mt-1">{{ $orders->total() }} pesanan ditemukan</p>
-        </div>
-        <a href="{{ route('user.shop') }}"
-            class="inline-flex items-center gap-2 bg-primary text-white font-bold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition text-sm shadow-lg shadow-purple-200">
-            <i class="fa-solid fa-bag-shopping"></i> Lanjut Belanja
-        </a>
-    </div>
-
-    {{-- Filter Tab Status --}}
-    @php
-        $tabList = [
-            '' => 'Semua',
-            'pending' => 'Menunggu Bayar',
-            'paid' => 'Sudah Dibayar',
-            'processing' => 'Diproses',
-            'shipped' => 'Dikirim',
-            'delivered' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
-        ];
-        $tabColors = [
-            'pending' => 'yellow',
-            'paid' => 'blue',
-            'processing' => 'purple',
-            'shipped' => 'indigo',
-            'delivered' => 'green',
-            'cancelled' => 'red',
-        ];
-    @endphp
-
-    <div class="flex gap-2 flex-wrap mb-6 overflow-x-auto pb-1">
-        @foreach ($tabList as $key => $label)
-            <a href="{{ route('user.orders', $key ? ['status' => $key] : []) }}"
-                class="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap
-              {{ request('status') === $key || (!request('status') && $key === '')
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-white border border-gray-200 text-gray-500 hover:border-primary hover:text-primary' }}">
-                {{ $label }}
-                @if ($key && isset($statusCounts[$key]) && $statusCounts[$key] > 0)
-                    <span class="ml-1 opacity-80">({{ $statusCounts[$key] }})</span>
-                @endif
-            </a>
-        @endforeach
-    </div>
-
-    {{-- Daftar Pesanan --}}
-    @if ($orders->isEmpty())
-        <div class="bg-white rounded-3xl py-24 text-center border border-gray-100">
-            <div class="text-7xl mb-5">📋</div>
-            <h3 class="text-xl font-black text-gray-700 mb-2">Belum ada pesanan</h3>
-            <p class="text-gray-400 text-sm mb-6">Yuk mulai belanja koleksi terbaru Caysie!</p>
-            <a href="{{ route('user.shop') }}"
-                class="inline-block bg-primary text-white font-bold px-8 py-3 rounded-2xl hover:bg-primary-dark transition shadow-lg shadow-purple-200">
-                Mulai Belanja
-            </a>
-        </div>
-    @else
-        <div class="space-y-4">
-            @foreach ($orders as $order)
-                @php
-                    $sc = $tabColors[$order->status] ?? 'gray';
-                    $isExpired = $order->isPaymentExpired();
-                @endphp
-
-                <div
-                    class="bg-white rounded-2xl overflow-hidden border-2
-        {{ $order->status === 'pending' && !$isExpired ? 'border-yellow-300' : ($order->status === 'delivered' ? 'border-green-200' : ($order->status === 'cancelled' ? 'border-red-100' : 'border-gray-100')) }}
-        transition hover:shadow-md">
-
-                    {{-- Header Kartu --}}
-                    <div
-                        class="px-5 py-3.5 flex items-center justify-between flex-wrap gap-3
-            {{ $order->status === 'pending' && !$isExpired
-                ? 'bg-yellow-50'
-                : ($order->status === 'delivered'
-                    ? 'bg-green-50'
-                    : ($order->status === 'cancelled'
-                        ? 'bg-red-50'
-                        : ($order->status === 'shipped'
-                            ? 'bg-blue-50'
-                            : 'bg-gray-50'))) }}">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <span class="font-black text-gray-800 text-sm">{{ $order->order_code }}</span>
-                            <span class="text-xs text-gray-400">
-                                <i class="fa-regular fa-calendar text-xs mr-1"></i>
-                                {{ $order->created_at->isoFormat('D MMM Y, HH:mm') }}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            {{-- Badge status --}}
-                            <span
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold
-                    bg-{{ $sc }}-100 text-{{ $sc }}-700">
-                                <span class="w-1.5 h-1.5 rounded-full bg-{{ $sc }}-500"></span>
-                                @if ($order->status === 'pending' && $isExpired)
-                                    Waktu Habis
-                                @else
-                                    {{ $order->status_label }}
-                                @endif
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="p-5">
-
-                        {{-- Produk (maks 2 tampil, sisanya "+N lagi") --}}
-                        <div class="space-y-3 mb-4">
-                            @foreach ($order->items->take(2) as $item)
-                                <div class="flex gap-3 items-center">
-                                    <div class="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                                        @if ($item->product_image)
-                                            <img src="{{ asset('storage/' . $item->product_image) }}"
-                                                class="w-full h-full object-cover {{ $order->status === 'cancelled' ? 'grayscale opacity-50' : '' }}">
-                                        @else
-                                            <div
-                                                class="w-full h-full flex items-center justify-center text-2xl
-                                {{ $order->status === 'cancelled' ? 'opacity-40' : '' }}">
-                                                👕</div>
-                                        @endif
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p
-                                            class="font-bold text-sm {{ $order->status === 'cancelled' ? 'text-gray-400' : 'text-gray-800' }} line-clamp-1">
-                                            {{ $item->product_name }}
-                                        </p>
-                                        <p class="text-xs text-gray-400 mt-0.5">
-                                            Ukuran {{ $item->product_size }} · {{ $item->quantity }} pcs
-                                        </p>
-                                    </div>
-                                    <p
-                                        class="font-black text-sm {{ $order->status === 'cancelled' ? 'text-gray-300' : 'text-primary' }} flex-shrink-0">
-                                        Rp{{ number_format($item->subtotal, 0, ',', '.') }}
-                                    </p>
-                                </div>
-                            @endforeach
-
-                            @if ($order->items->count() > 2)
-                                <p class="text-xs text-gray-400 italic pl-1">
-                                    + {{ $order->items->count() - 2 }} produk lainnya
-                                </p>
-                            @endif
-                        </div>
-
-                        {{-- Ringkasan harga --}}
-                        <div class="bg-gray-50 rounded-xl p-3 mb-4 flex flex-wrap gap-x-6 gap-y-1.5 text-xs">
-                            <div class="flex justify-between w-full">
-                                <span class="text-gray-400">Subtotal produk</span>
-                                <span
-                                    class="font-bold text-gray-700">Rp{{ number_format($order->subtotal, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between w-full">
-                                <span class="text-gray-400">Ongkos kirim ({{ $order->courier_name }}
-                                    {{ $order->courier_service }})</span>
-                                <span
-                                    class="font-bold text-gray-700">Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between w-full pt-1.5 border-t border-gray-200">
-                                <span class="font-black text-gray-800">Total Bayar</span>
-                                <span
-                                    class="font-black text-primary text-sm">Rp{{ number_format($order->total, 0, ',', '.') }}</span>
-                            </div>
-                        </div>
-
-                        {{-- Info Pengiriman jika shipped --}}
-                        @if ($order->status === 'shipped')
-                            <div
-                                class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
-                                <i class="fa-solid fa-truck text-blue-500 text-sm"></i>
-                                <div>
-                                    <p class="text-xs font-bold text-blue-800">Paket sedang dalam perjalanan</p>
-                                    <p class="text-xs text-blue-600 mt-0.5">Estimasi tiba {{ $order->shipping_estimate }}
-                                        hari kerja sejak pengiriman</p>
-                                </div>
-                            </div>
+        {{-- Header --}}
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 bg-purple-100 text-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-receipt text-sm"></i>
+                </span>
+                <div>
+                    <h1 class="text-2xl font-black text-gray-800 leading-tight">Riwayat Pesanan</h1>
+                    <p class="text-xs text-gray-400">
+                        @if ($orders->total())
+                            Kamu punya {{ $orders->total() }} pesanan tercatat
+                        @else
+                            Semua pesananmu akan muncul di sini
                         @endif
-
-                        {{-- Countdown + Info Bayar jika PENDING --}}
-                        @if ($order->status === 'pending' && !$isExpired)
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-                                <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
-                                    <div>
-                                        <p class="text-xs font-bold text-yellow-800 flex items-center gap-1.5">
-                                            <i class="fa-solid fa-clock text-yellow-600"></i>
-                                            Selesaikan pembayaran sebelum:
-                                        </p>
-                                        <p class="text-xs text-yellow-600 mt-0.5">{{ $order->payment_deadline_label }}</p>
-                                    </div>
-                                    <div
-                                        class="bg-white border border-yellow-300 rounded-xl px-4 py-2 text-center min-w-28">
-                                        <p class="text-xs text-yellow-600 font-semibold mb-0.5">Sisa Waktu</p>
-                                        <p class="text-xl font-black text-yellow-700 font-mono tracking-widest"
-                                            data-countdown="{{ $order->payment_seconds_left }}"
-                                            id="countdown-{{ $order->id }}">
-                                            {{ gmdate('H:i:s', $order->payment_seconds_left) }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="bg-white rounded-xl p-3 text-xs">
-                                    <p class="font-bold text-gray-700 mb-1">Transfer ke rekening berikut:</p>
-                                    <div class="space-y-1 text-gray-600">
-                                        <p><span class="text-gray-400 w-20 inline-block">Bank</span> <strong>BCA</strong>
-                                        </p>
-                                        <p><span class="text-gray-400 w-20 inline-block">No. Rek</span> <strong
-                                                class="text-primary">1234567890</strong>
-                                            <button onclick="copyRek()" class="ml-2 text-primary hover:underline font-bold"
-                                                id="copy-rek">Salin</button>
-                                        </p>
-                                        <p><span class="text-gray-400 w-20 inline-block">Atas Nama</span> <strong>Caysie
-                                                Store</strong></p>
-                                        <p><span class="text-gray-400 w-20 inline-block">Jumlah</span>
-                                            <strong
-                                                class="text-primary">Rp{{ number_format($order->total, 0, ',', '.') }}</strong>
-                                            <span class="text-gray-400 ml-1">(transfer tepat)</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        @elseif($order->status === 'pending' && $isExpired)
-                            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
-                                <i class="fa-solid fa-clock text-red-400 text-sm"></i>
-                                <p class="text-xs font-bold text-red-700">Waktu pembayaran telah habis. Pesanan otomatis
-                                    dibatalkan.</p>
-                            </div>
-                        @endif
-
-                        {{-- Alasan batal --}}
-                        @if ($order->status === 'cancelled' && $order->cancel_reason)
-                            <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
-                                <p class="text-xs font-bold text-red-700 mb-1">
-                                    <i class="fa-solid fa-circle-xmark mr-1"></i>
-                                    Alasan Pembatalan
-                                    @if ($order->cancelled_by === 'system')
-                                        <span class="font-normal text-red-400">(sistem)</span>
-                                    @elseif($order->cancelled_by === 'user')
-                                        <span class="font-normal text-red-400">(kamu)</span>
-                                    @endif
-                                </p>
-                                <p class="text-xs text-red-600 italic">"{{ $order->cancel_reason }}"</p>
-                            </div>
-                        @endif
-
-                        {{-- Bukti bayar sudah diupload --}}
-                        @if ($order->payment_proof && $order->status !== 'pending')
-                            <div
-                                class="flex items-center gap-2 text-xs text-green-700 bg-green-50 rounded-xl px-4 py-2.5 mb-4 border border-green-100">
-                                <i class="fa-solid fa-circle-check text-green-500"></i>
-                                <span class="font-semibold">Bukti pembayaran sudah dikirim</span>
-                                <span class="text-green-500">· {{ $order->paid_at?->isoFormat('D MMM Y, HH:mm') }}</span>
-                            </div>
-                        @endif
-
-                        {{-- ===== TOMBOL AKSI ===== --}}
-                        <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
-
-                            {{-- Detail selalu tampil --}}
-                            <a href="{{ route('user.orders.show', $order) }}"
-                                class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:border-primary hover:text-primary transition">
-                                <i class="fa-solid fa-eye text-xs"></i> Detail Pesanan
-                            </a>
-
-                            {{-- Upload bukti bayar --}}
-                            @if ($order->can_pay && !$order->payment_proof)
-                                <button onclick="openUploadModal('{{ $order->id }}', '{{ $order->order_code }}')"
-                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-dark transition shadow-md shadow-purple-200">
-                                    <i class="fa-solid fa-upload text-xs"></i> Upload Bukti Bayar
-                                </button>
-                            @endif
-
-                            {{-- Batalkan pesanan --}}
-                            @if ($order->can_cancel && $order->status !== 'cancelled')
-                                <button onclick="openCancelModal('{{ $order->id }}', '{{ $order->order_code }}')"
-                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition">
-                                    <i class="fa-solid fa-xmark text-xs"></i> Batalkan Pesanan
-                                </button>
-                            @endif
-
-                            {{-- Beli lagi jika delivered atau cancelled --}}
-                            @if (in_array($order->status, ['delivered', 'cancelled']))
-                                <form action="{{ route('user.orders.reorder', $order) }}" method="POST">
-                                    @csrf
-                                    <button type="submit"
-                                        class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-100 transition">
-                                        <i class="fa-solid fa-rotate-right text-xs"></i> Beli Lagi
-                                    </button>
-                                </form>
-                            @endif
-
-                        </div>
-                    </div>
+                    </p>
                 </div>
+            </div>
+            <a href="{{ route('user.shop') }}"
+                class="inline-flex items-center gap-2 bg-primary text-white font-bold px-5 py-2.5 rounded-xl hover:bg-primary-dark transition text-sm shadow-lg shadow-purple-200">
+                <i class="fa-solid fa-bag-shopping"></i> Lanjut Belanja
+            </a>
+        </div>
+
+        {{-- Filter Tab Status --}}
+        @php
+            $tabList = [
+                '' => 'Semua',
+                'pending' => 'Menunggu Bayar',
+                'paid' => 'Sudah Dibayar',
+                'processing' => 'Diproses',
+                'shipped' => 'Dikirim',
+                'delivered' => 'Selesai',
+                'cancelled' => 'Dibatalkan',
+            ];
+            $tabColors = [
+                'pending' => 'yellow',
+                'paid' => 'blue',
+                'processing' => 'purple',
+                'shipped' => 'indigo',
+                'delivered' => 'green',
+                'cancelled' => 'red',
+            ];
+        @endphp
+
+        <div class="flex gap-2 flex-wrap mb-6 overflow-x-auto pb-1">
+            @foreach ($tabList as $key => $label)
+                <a href="{{ route('user.orders', $key ? ['status' => $key] : []) }}"
+                    class="flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition whitespace-nowrap
+              {{ request('status') === $key || (!request('status') && $key === '')
+                  ? 'bg-primary text-white shadow-md shadow-purple-200'
+                  : 'bg-white border border-gray-200 text-gray-500 hover:border-primary hover:text-primary' }}">
+                    {{ $label }}
+                    @if ($key && isset($statusCounts[$key]) && $statusCounts[$key] > 0)
+                        <span class="ml-1 opacity-80">({{ $statusCounts[$key] }})</span>
+                    @endif
+                </a>
             @endforeach
         </div>
 
-        {{-- Pagination --}}
-        @if ($orders->hasPages())
-            <div class="mt-6">{{ $orders->withQueryString()->links() }}</div>
+        {{-- Daftar Pesanan --}}
+        @if ($orders->isEmpty())
+            <div class="bg-white rounded-3xl py-20 px-6 text-center border border-gray-100">
+                <div class="w-20 h-20 mx-auto mb-5 bg-purple-50 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-receipt text-3xl text-primary/40"></i>
+                </div>
+                <h3 class="text-lg font-black text-gray-700 mb-1.5">Belum ada pesanan</h3>
+                <p class="text-gray-400 text-sm mb-6">Semua pesanan yang kamu buat akan tampil di halaman ini. Yuk mulai
+                    belanja koleksi terbaru Caysie!</p>
+                <a href="{{ route('user.shop') }}"
+                    class="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-3 rounded-2xl hover:bg-primary-dark transition shadow-lg shadow-purple-200">
+                    <i class="fa-solid fa-bag-shopping text-xs"></i> Mulai Belanja
+                </a>
+            </div>
+        @else
+            <div class="space-y-4">
+                @foreach ($orders as $order)
+                    @php
+                        $sc = $tabColors[$order->status] ?? 'gray';
+                        $isExpired = $order->isPaymentExpired();
+                    @endphp
+
+                    <div
+                        class="bg-white rounded-2xl overflow-hidden border
+        {{ $order->status === 'pending' && !$isExpired ? 'border-yellow-300' : ($order->status === 'delivered' ? 'border-green-200' : ($order->status === 'cancelled' ? 'border-red-100' : 'border-gray-100')) }}
+        transition hover:shadow-md">
+
+                        {{-- Header Kartu --}}
+                        <div
+                            class="px-5 py-3.5 flex items-center justify-between flex-wrap gap-3 bg-gray-50/70 border-b border-gray-100">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="font-black text-gray-800 text-sm">{{ $order->order_code }}</span>
+                                <span class="text-xs text-gray-400">
+                                    <i class="fa-regular fa-calendar text-xs mr-1"></i>
+                                    {{ $order->created_at->isoFormat('D MMM Y, HH:mm') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {{-- Badge status --}}
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold
+                    bg-{{ $sc }}-100 text-{{ $sc }}-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-{{ $sc }}-500"></span>
+                                    @if ($order->status === 'pending' && $isExpired)
+                                        Waktu Habis
+                                    @else
+                                        {{ $order->status_label }}
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="p-5">
+
+                            {{-- Produk (maks 2 tampil, sisanya "+N lagi") --}}
+                            <div class="space-y-3 mb-4">
+                                @foreach ($order->items->take(2) as $item)
+                                    <div class="flex gap-3 items-center">
+                                        <div class="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                                            @if ($item->product_image)
+                                                <img src="{{ asset('storage/' . $item->product_image) }}"
+                                                    class="w-full h-full object-cover {{ $order->status === 'cancelled' ? 'grayscale opacity-50' : '' }}">
+                                            @else
+                                                <div
+                                                    class="w-full h-full flex items-center justify-center text-2xl
+                                {{ $order->status === 'cancelled' ? 'opacity-40' : '' }}">
+                                                    👕</div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p
+                                                class="font-bold text-sm {{ $order->status === 'cancelled' ? 'text-gray-400' : 'text-gray-800' }} line-clamp-1">
+                                                {{ $item->product_name }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-0.5">
+                                                Ukuran {{ $item->product_size }} · {{ $item->quantity }} pcs
+                                            </p>
+                                        </div>
+                                        <p
+                                            class="font-black text-sm {{ $order->status === 'cancelled' ? 'text-gray-300' : 'text-primary' }} flex-shrink-0">
+                                            Rp{{ number_format($item->subtotal, 0, ',', '.') }}
+                                        </p>
+                                    </div>
+                                @endforeach
+
+                                @if ($order->items->count() > 2)
+                                    <p class="text-xs text-gray-400 italic pl-1">
+                                        + {{ $order->items->count() - 2 }} produk lainnya
+                                    </p>
+                                @endif
+                            </div>
+
+                            {{-- Ringkasan harga --}}
+                            <div class="bg-gray-50 rounded-xl p-3 mb-4 flex flex-wrap gap-x-6 gap-y-1.5 text-xs">
+                                <div class="flex justify-between w-full">
+                                    <span class="text-gray-400">Subtotal produk</span>
+                                    <span
+                                        class="font-bold text-gray-700">Rp{{ number_format($order->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between w-full">
+                                    <span class="text-gray-400">Ongkos kirim ({{ $order->courier_name }}
+                                        {{ $order->courier_service }})</span>
+                                    <span
+                                        class="font-bold text-gray-700">Rp{{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between w-full pt-1.5 border-t border-gray-200">
+                                    <span class="font-black text-gray-800">Total Bayar</span>
+                                    <span
+                                        class="font-black text-primary text-sm">Rp{{ number_format($order->total, 0, ',', '.') }}</span>
+                                </div>
+                            </div>
+
+                            {{-- Info Pengiriman jika shipped --}}
+                            @if ($order->status === 'shipped')
+                                <div
+                                    class="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                                    <i class="fa-solid fa-truck text-blue-500 text-sm"></i>
+                                    <div>
+                                        <p class="text-xs font-bold text-blue-800">Paket sedang dalam perjalanan</p>
+                                        <p class="text-xs text-blue-600 mt-0.5">Estimasi tiba
+                                            {{ $order->shipping_estimate }}
+                                            hari kerja sejak pengiriman</p>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Countdown + Info Bayar jika PENDING --}}
+                            @if ($order->status === 'pending' && !$isExpired)
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                                    <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+                                        <div>
+                                            <p class="text-xs font-bold text-yellow-800 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-clock text-yellow-600"></i>
+                                                Selesaikan pembayaran sebelum:
+                                            </p>
+                                            <p class="text-xs text-yellow-600 mt-0.5">{{ $order->payment_deadline_label }}
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="bg-white border border-yellow-300 rounded-xl px-4 py-2 text-center min-w-28">
+                                            <p class="text-xs text-yellow-600 font-semibold mb-0.5">Sisa Waktu</p>
+                                            <p class="text-xl font-black text-yellow-700 font-mono tracking-widest"
+                                                data-countdown="{{ $order->payment_seconds_left }}"
+                                                id="countdown-{{ $order->id }}">
+                                                {{ gmdate('H:i:s', $order->payment_seconds_left) }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-3 text-xs">
+                                        <p class="font-bold text-gray-700 mb-1">Transfer ke rekening berikut:</p>
+                                        <div class="space-y-1 text-gray-600">
+                                            <p><span class="text-gray-400 w-20 inline-block">Bank</span>
+                                                <strong>BCA</strong>
+                                            </p>
+                                            <p><span class="text-gray-400 w-20 inline-block">No. Rek</span> <strong
+                                                    class="text-primary">1234567890</strong>
+                                                <button onclick="copyRek()"
+                                                    class="ml-2 text-primary hover:underline font-bold"
+                                                    id="copy-rek">Salin</button>
+                                            </p>
+                                            <p><span class="text-gray-400 w-20 inline-block">Atas Nama</span> <strong>Caysie
+                                                    Store</strong></p>
+                                            <p><span class="text-gray-400 w-20 inline-block">Jumlah</span>
+                                                <strong
+                                                    class="text-primary">Rp{{ number_format($order->total, 0, ',', '.') }}</strong>
+                                                <span class="text-gray-400 ml-1">(mohon transfer sesuai nominal ini)</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($order->status === 'pending' && $isExpired)
+                                <div
+                                    class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                                    <i class="fa-solid fa-clock text-red-400 text-sm"></i>
+                                    <p class="text-xs font-bold text-red-700">Waktu pembayaran telah habis. Pesanan otomatis
+                                        dibatalkan.</p>
+                                </div>
+                            @endif
+
+                            {{-- Alasan batal --}}
+                            @if ($order->status === 'cancelled' && $order->cancel_reason)
+                                <div class="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                                    <p class="text-xs font-bold text-red-700 mb-1">
+                                        <i class="fa-solid fa-circle-xmark mr-1"></i>
+                                        Alasan Pembatalan
+                                        @if ($order->cancelled_by === 'system')
+                                            <span class="font-normal text-red-400">(sistem)</span>
+                                        @elseif($order->cancelled_by === 'user')
+                                            <span class="font-normal text-red-400">(kamu)</span>
+                                        @endif
+                                    </p>
+                                    <p class="text-xs text-red-600 italic">"{{ $order->cancel_reason }}"</p>
+                                </div>
+                            @endif
+
+                            {{-- Bukti bayar sudah diupload --}}
+                            @if ($order->payment_proof && $order->status !== 'pending')
+                                <div
+                                    class="flex items-center gap-2 text-xs text-green-700 bg-green-50 rounded-xl px-4 py-2.5 mb-4 border border-green-100">
+                                    <i class="fa-solid fa-circle-check text-green-500"></i>
+                                    <span class="font-semibold">Bukti pembayaran sudah dikirim</span>
+                                    <span class="text-green-500">·
+                                        {{ $order->paid_at?->isoFormat('D MMM Y, HH:mm') }}</span>
+                                </div>
+                            @endif
+
+                            {{-- ===== TOMBOL AKSI ===== --}}
+                            <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
+
+                                {{-- Detail selalu tampil --}}
+                                <a href="{{ route('user.orders.show', $order) }}"
+                                    class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:border-primary hover:text-primary transition">
+                                    <i class="fa-solid fa-eye text-xs"></i> Detail Pesanan
+                                </a>
+
+                                {{-- Upload bukti bayar --}}
+                                @if ($order->can_pay && !$order->payment_proof)
+                                    <button onclick="openUploadModal('{{ $order->id }}', '{{ $order->order_code }}')"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-dark transition shadow-md shadow-purple-200">
+                                        <i class="fa-solid fa-upload text-xs"></i> Upload Bukti Bayar
+                                    </button>
+                                @endif
+
+                                {{-- Batalkan pesanan --}}
+                                @if ($order->can_cancel && $order->status !== 'cancelled')
+                                    <button onclick="openCancelModal('{{ $order->id }}', '{{ $order->order_code }}')"
+                                        class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-100 transition">
+                                        <i class="fa-solid fa-xmark text-xs"></i> Batalkan Pesanan
+                                    </button>
+                                @endif
+
+                                {{-- Beli lagi jika delivered atau cancelled --}}
+                                @if (in_array($order->status, ['delivered', 'cancelled']))
+                                    <form action="{{ route('user.orders.reorder', $order) }}" method="POST">
+                                        @csrf
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-50 border border-purple-200 text-purple-700 rounded-xl text-xs font-bold hover:bg-purple-100 transition">
+                                            <i class="fa-solid fa-rotate-right text-xs"></i> Beli Lagi
+                                        </button>
+                                    </form>
+                                @endif
+
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Pagination --}}
+            @if ($orders->hasPages())
+                <div class="mt-6">{{ $orders->withQueryString()->links() }}</div>
+            @endif
         @endif
-    @endif
+
+    </div>
 
     {{-- ===== MODAL UPLOAD BUKTI BAYAR ===== --}}
     <div id="modal-upload" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"

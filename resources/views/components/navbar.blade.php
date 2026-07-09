@@ -1,36 +1,37 @@
-<nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+<nav class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100/80">
+    <div class="max-w-7xl mx-auto px-6 h-[68px] flex items-center justify-between gap-4">
 
         {{-- LOGO --}}
-        <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2.5 flex-shrink-0">
-            <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-purple-200">
+        <a href="{{ route('user.dashboard') }}" class="flex items-center gap-2.5 flex-shrink-0 group">
+            <div
+                class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center shadow-lg shadow-primary/25 group-hover:rotate-6 group-hover:scale-105 transition-transform duration-300">
                 <i class="fa-solid fa-shirt text-white text-sm"></i>
             </div>
-            <span class="text-xl font-black text-gray-800 tracking-wide">CAYSIE</span>
+            <span class="text-xl font-black text-dark tracking-tight">CAYSIE</span>
         </a>
 
         {{-- MENU TENGAH --}}
-        <div class="hidden md:flex items-center gap-7 flex-1 justify-center">
+        <div class="hidden md:flex items-center gap-1.5 flex-1 justify-center">
             <a href="{{ route('user.dashboard') }}"
-                class="text-sm font-semibold transition hover:text-primary
-                      {{ request()->routeIs('user.dashboard') ? 'text-primary' : 'text-gray-500' }}">
+                class="relative text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200
+                      {{ request()->routeIs('user.dashboard') ? 'text-primary bg-primary/10' : 'text-gray-500 hover:text-dark hover:bg-gray-100' }}">
                 Beranda
             </a>
             <a href="{{ route('user.shop') }}"
-                class="text-sm font-semibold transition hover:text-primary
-                      {{ request()->routeIs('user.shop*', 'user.product.*') ? 'text-primary' : 'text-gray-500' }}">
+                class="relative text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200
+                      {{ request()->routeIs('user.shop*', 'user.product.*') ? 'text-primary bg-primary/10' : 'text-gray-500 hover:text-dark hover:bg-gray-100' }}">
                 Produk
             </a>
         </div>
 
         {{-- ICON KANAN --}}
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
             @auth
                 {{-- ── IKON RIWAYAT PESANAN + DROPDOWN ── --}}
                 <div class="nav-dropdown" id="order-nav-dropdown">
                     <button onclick="toggleDropdown('order-nav-dropdown')"
-                        class="relative w-10 h-10 rounded-xl flex items-center justify-center transition
-                           {{ request()->routeIs('user.orders*') ? 'bg-purple-100' : 'hover:bg-gray-100' }}"
+                        class="relative w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200
+                           {{ request()->routeIs('user.orders*') ? 'bg-primary/10' : 'hover:bg-gray-100' }}"
                         title="Riwayat Pesanan">
                         <i
                             class="fa-solid fa-clipboard-list text-lg
@@ -51,9 +52,10 @@
                     <div class="nav-dropdown-menu">
 
                         {{-- Header --}}
-                        <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                        <div
+                            class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
                             <div class="flex items-center gap-2">
-                                <h3 class="font-black text-gray-800 text-sm">Riwayat Pembelian</h3>
+                                <h3 class="font-black text-dark text-sm">Riwayat Pembelian</h3>
                                 @if (isset($activeOrderCount) && $activeOrderCount > 0)
                                     <span
                                         class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -240,8 +242,8 @@
 
                 {{-- KERANJANG --}}
                 <a href="{{ route('user.cart') }}"
-                    class="relative w-10 h-10 rounded-xl flex items-center justify-center transition
-                      {{ request()->routeIs('user.cart') ? 'bg-purple-100' : 'hover:bg-gray-100' }}"
+                    class="relative w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200
+                      {{ request()->routeIs('user.cart') ? 'bg-primary/10' : 'hover:bg-gray-100' }}"
                     title="Keranjang">
                     <i
                         class="fa-solid fa-cart-shopping text-lg
@@ -259,10 +261,10 @@
                 {{-- PROFIL DROPDOWN --}}
                 <div class="profile-dropdown hidden md:block" id="profile-nav-dropdown">
                     <button onclick="toggleDropdown('profile-nav-dropdown')"
-                        class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-xl hover:bg-gray-100 transition group">
+                        class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-2xl hover:bg-gray-100 transition-all duration-200 group">
                         <div
-                            class="w-8 h-8 bg-primary rounded-full flex items-center justify-center
-                                text-white font-black text-sm shadow-md shadow-purple-200">
+                            class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center
+                                text-white font-black text-sm shadow-md shadow-primary/25">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                         <span class="text-sm font-semibold text-gray-700 max-w-24 truncate hidden lg:block">
@@ -273,15 +275,15 @@
 
                     <div class="profile-dropdown-menu">
                         {{-- Info user --}}
-                        <div class="px-4 py-4 border-b border-gray-100">
+                        <div class="px-4 py-4 border-b border-gray-100 bg-gradient-to-r from-primary/5 to-transparent">
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="w-10 h-10 bg-primary rounded-full flex items-center justify-center
-                                        text-white font-black text-base shadow-md shadow-purple-200">
+                                    class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center
+                                        text-white font-black text-base shadow-md shadow-primary/25">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="font-black text-gray-800 text-sm truncate">{{ auth()->user()->name }}</p>
+                                    <p class="font-black text-dark text-sm truncate">{{ auth()->user()->name }}</p>
                                     <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
                                 </div>
                             </div>
@@ -361,18 +363,18 @@
             @endauth
             @guest
                 <a href="{{ route('login') }}"
-                    class="text-sm font-semibold text-gray-600 hover:text-primary border border-gray-200 hover:border-primary px-4 py-2 rounded-xl transition">
+                    class="text-sm font-semibold text-gray-600 hover:text-primary px-4 py-2 rounded-full hover:bg-gray-100 transition-all duration-200">
                     Masuk
                 </a>
 
                 <a href="{{ route('register') }}"
-                    class="text-sm font-semibold text-white bg-primary hover:bg-primary-dark px-5 py-2 rounded-xl transition shadow-md shadow-purple-200">
+                    class="text-sm font-semibold text-white bg-gradient-to-r from-primary to-primary-dark hover:opacity-90 px-5 py-2.5 rounded-full transition-all duration-200 shadow-lg shadow-primary/25">
                     Daftar Gratis
                 </a>
             @endguest
             {{-- Mobile: burger --}}
             <button
-                class="md:hidden w-10 h-10 rounded-xl flex items-center justify-center hover:bg-gray-100 transition"
+                class="md:hidden w-10 h-10 rounded-2xl flex items-center justify-center hover:bg-gray-100 transition-all duration-200"
                 onclick="toggleMobileMenu()">
                 <i class="fa-solid fa-bars text-gray-600" id="mobile-menu-icon"></i>
             </button>
@@ -380,23 +382,23 @@
     </div>
 
     {{-- MOBILE MENU --}}
-    <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white">
+    <div id="mobile-menu" class="hidden md:hidden border-t border-gray-100 bg-white/95 backdrop-blur-lg">
         <div class="px-4 py-3 space-y-1">
             <a href="{{ route('user.dashboard') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition
-                      {{ request()->routeIs('user.dashboard') ? 'bg-purple-50 text-primary' : 'text-gray-600' }}">
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                      {{ request()->routeIs('user.dashboard') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50' }}">
                 <i class="fa-solid fa-house text-sm w-4"></i>
                 <span class="text-sm font-semibold">Beranda</span>
             </a>
             <a href="{{ route('user.shop') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition
-                      {{ request()->routeIs('user.shop*') ? 'bg-purple-50 text-primary' : 'text-gray-600' }}">
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                      {{ request()->routeIs('user.shop*') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50' }}">
                 <i class="fa-solid fa-bag-shopping text-sm w-4"></i>
                 <span class="text-sm font-semibold">Produk</span>
             </a>
             <a href="{{ route('user.orders') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition
-                      {{ request()->routeIs('user.orders*') ? 'bg-purple-50 text-primary' : 'text-gray-600' }}">
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                      {{ request()->routeIs('user.orders*') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50' }}">
                 <i class="fa-solid fa-clipboard-list text-sm w-4"></i>
                 <div class="flex-1 flex items-center justify-between">
                     <span class="text-sm font-semibold">Riwayat Pesanan</span>
@@ -408,8 +410,8 @@
                 </div>
             </a>
             <a href="{{ route('user.cart') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 transition
-                      {{ request()->routeIs('user.cart') ? 'bg-purple-50 text-primary' : 'text-gray-600' }}">
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                      {{ request()->routeIs('user.cart') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50' }}">
                 <i class="fa-solid fa-cart-shopping text-sm w-4"></i>
                 <div class="flex-1 flex items-center justify-between">
                     <span class="text-sm font-semibold">Keranjang</span>
@@ -424,7 +426,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                        class="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-50 text-left transition">
+                        class="w-full flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-red-50 text-left transition-all duration-200">
                         <i class="fa-solid fa-right-from-bracket text-red-400 text-sm w-4"></i>
                         <span class="text-sm font-semibold text-red-500">Keluar</span>
                     </button>
@@ -432,15 +434,17 @@
             </div>
 
             @guest
-                <a href="{{ route('login') }}"
-                    class="text-sm font-semibold text-center text-primary border border-primary py-2 rounded-xl">
-                    Masuk
-                </a>
+                <div class="flex flex-col gap-2 pt-2">
+                    <a href="{{ route('login') }}"
+                        class="text-sm font-semibold text-center text-primary border border-primary/30 py-2.5 rounded-full hover:bg-primary/5 transition-all duration-200">
+                        Masuk
+                    </a>
 
-                <a href="{{ route('register') }}"
-                    class="text-sm font-semibold text-center text-white bg-primary py-2 rounded-xl">
-                    Daftar Gratis
-                </a>
+                    <a href="{{ route('register') }}"
+                        class="text-sm font-semibold text-center text-white bg-gradient-to-r from-primary to-primary-dark py-2.5 rounded-full shadow-lg shadow-primary/25">
+                        Daftar Gratis
+                    </a>
+                </div>
             @endguest
         </div>
     </div>

@@ -26,27 +26,36 @@
                 {{-- FOTO --}}
                 <div>
                     <div
-                        class="w-full h-[420px] bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl overflow-hidden mb-4 shadow-sm">
+                        class="w-full h-[420px] bg-gradient-to-br from-purple-100 to-indigo-100 rounded-3xl overflow-hidden mb-4 shadow-sm relative">
                         @if ($product->image)
                             <img src="{{ asset('storage/' . $product->image) }}" id="main-img"
-                                class="w-full h-full object-cover transition-all duration-300" alt="{{ $product->name }}">
+                                class="w-full h-full object-cover transition-opacity duration-200"
+                                alt="{{ $product->name }}">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-8xl">👕</div>
                         @endif
+
+                        @if ($product->price_sale)
+                            <span
+                                class="absolute top-4 left-4 bg-red-500 text-white text-xs font-black px-3 py-1 rounded-lg shadow-sm">
+                                -{{ $product->discount_percent }}%
+                            </span>
+                        @endif
                     </div>
 
-                    @if ($product->images && count($product->images))
-                        <div class="flex gap-3">
+                    @if ($product->image || ($product->images && count($product->images)))
+                        <div class="flex gap-3 flex-wrap">
                             @if ($product->image)
-                                <button onclick="switchImg('{{ asset('storage/' . $product->image) }}')"
-                                    class="w-16 h-16 rounded-xl overflow-hidden border-2 border-primary">
+                                <button type="button"
+                                    onclick="switchImg(this, '{{ asset('storage/' . $product->image) }}')"
+                                    class="thumb-btn w-16 h-16 rounded-xl overflow-hidden border-2 border-primary transition">
                                     <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover">
                                 </button>
                             @endif
 
                             @foreach ($product->images as $img)
-                                <button onclick="switchImg('{{ asset('storage/' . $img) }}')"
-                                    class="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-primary transition">
+                                <button type="button" onclick="switchImg(this, '{{ asset('storage/' . $img) }}')"
+                                    class="thumb-btn w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-primary/50 transition">
                                     <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover">
                                 </button>
                             @endforeach
@@ -64,8 +73,9 @@
                         </span>
 
                         @if ($product->is_featured)
-                            <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">
-                                ⭐ Unggulan
+                            <span
+                                class="inline-flex items-center gap-1 bg-yellow-100 text-yellow-700 text-xs font-bold px-3 py-1 rounded-full">
+                                <i class="fa-solid fa-star text-[10px]"></i> Unggulan
                             </span>
                         @endif
                     </div>
@@ -102,15 +112,25 @@
                     </p>
 
                     {{-- Info --}}
-                    <div class="flex items-center gap-6 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-weight-hanging text-xs"></i>
-                            {{ $product->weight }}g
-                        </span>
-                        <span class="flex items-center gap-2">
-                            <i class="fa-solid fa-boxes-stacked text-xs"></i>
-                            Stok: {{ $product->total_stock }}
-                        </span>
+                    <div class="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+                        <div class="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3.5 py-2.5">
+                            <span class="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-weight-hanging text-[11px] text-gray-500"></i>
+                            </span>
+                            <div class="leading-tight">
+                                <p class="text-[10px] text-gray-400 font-semibold">Berat</p>
+                                <p class="text-sm font-bold text-gray-700">{{ $product->weight }}g</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2.5 bg-gray-50 rounded-xl px-3.5 py-2.5">
+                            <span class="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-boxes-stacked text-[11px] text-gray-500"></i>
+                            </span>
+                            <div class="leading-tight">
+                                <p class="text-[10px] text-gray-400 font-semibold">Sisa Stok</p>
+                                <p class="text-sm font-bold text-gray-700">{{ $product->total_stock }} pcs</p>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- FORM --}}
@@ -144,22 +164,22 @@
                             <p class="text-sm font-bold text-gray-700 mb-3">Jumlah</p>
                             <div class="flex items-center gap-3">
                                 <button type="button" onclick="changeQty(-1)"
-                                    class="w-10 h-10 rounded-xl border border-gray-200 hover:border-primary hover:text-primary transition">−</button>
+                                    class="w-10 h-10 rounded-xl border border-gray-200 text-gray-500 font-bold hover:border-primary hover:text-primary transition">−</button>
 
                                 <input type="number" name="quantity" id="qty" value="1" min="1"
                                     max="10"
-                                    class="w-16 text-center font-bold border border-gray-200 rounded-xl py-2">
+                                    class="w-16 text-center font-bold border border-gray-200 rounded-xl py-2 focus:outline-none focus:border-primary">
 
                                 <button type="button" onclick="changeQty(1)"
-                                    class="w-10 h-10 rounded-xl border border-gray-200 hover:border-primary hover:text-primary transition">+</button>
+                                    class="w-10 h-10 rounded-xl border border-gray-200 text-gray-500 font-bold hover:border-primary hover:text-primary transition">+</button>
                             </div>
                         </div>
 
                         {{-- BUTTON --}}
                         <div class="flex gap-3">
                             <button type="submit"
-                                class="flex-1 bg-primary text-white font-black py-3.5 rounded-2xl 
-                                   hover:bg-primary-dark transition shadow-lg shadow-purple-200 flex items-center justify-center gap-2">
+                                class="flex-1 bg-gradient-to-r from-primary to-primary-dark text-white font-black py-3.5 rounded-2xl 
+                                   hover:opacity-90 transition shadow-lg shadow-primary/25 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-cart-plus"></i> Tambah ke Keranjang
                             </button>
 
@@ -184,6 +204,9 @@
                     <h2 class="text-xl md:text-2xl font-black text-gray-800">
                         Produk Terkait
                     </h2>
+                    <a href="{{ route('user.shop') }}" class="text-sm text-primary font-bold hover:underline">
+                        Lihat semua →
+                    </a>
                 </div>
 
                 <div class="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
@@ -197,3 +220,39 @@
     @endif
 
 @endsection
+
+@push('scripts')
+    <script>
+        // ── Ganti foto utama saat thumbnail diklik ──────────────────
+        function switchImg(btn, url) {
+            const mainImg = document.getElementById('main-img');
+            if (!mainImg) return;
+
+            mainImg.style.opacity = '0';
+            setTimeout(() => {
+                mainImg.src = url;
+                mainImg.style.opacity = '1';
+            }, 120);
+
+            // Tandai thumbnail yang sedang aktif
+            document.querySelectorAll('.thumb-btn').forEach(el => {
+                el.classList.remove('border-primary');
+                el.classList.add('border-transparent');
+            });
+            btn.classList.remove('border-transparent');
+            btn.classList.add('border-primary');
+        }
+
+        // ── Tambah / kurangi jumlah beli ─────────────────────────────
+        function changeQty(delta) {
+            const input = document.getElementById('qty');
+            if (!input) return;
+            let val = parseInt(input.value || '1', 10) + delta;
+            const min = parseInt(input.min || '1', 10);
+            const max = parseInt(input.max || '10', 10);
+            if (val < min) val = min;
+            if (val > max) val = max;
+            input.value = val;
+        }
+    </script>
+@endpush

@@ -51,12 +51,13 @@
         .nav-dropdown-menu {
             display: none;
             position: absolute;
-            top: calc(100% + 12px);
+            top: calc(100% + 14px);
             right: 0;
-            background: #fff;
+            background: rgba(255, 255, 255, .98);
+            backdrop-filter: blur(12px);
             border: 1px solid #f0f0f0;
-            border-radius: 20px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+            border-radius: 22px;
+            box-shadow: 0 20px 50px rgba(26, 26, 46, .12);
             width: 360px;
             z-index: 9999;
             overflow: hidden;
@@ -91,13 +92,14 @@
         .profile-dropdown-menu {
             display: none;
             position: absolute;
-            top: calc(100% + 12px);
+            top: calc(100% + 14px);
             right: 0;
-            background: #fff;
+            background: rgba(255, 255, 255, .98);
+            backdrop-filter: blur(12px);
             border: 1px solid #f0f0f0;
-            border-radius: 16px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
-            width: 220px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(26, 26, 46, .12);
+            width: 230px;
             z-index: 9999;
             overflow: hidden;
         }
