@@ -43,6 +43,12 @@ return [
         'api_key' => env('BINDERBYTE_API_KEY'),
         'base_url' => env('BINDERBYTE_BASE_URL', 'https://api.binderbyte.com'),
     ],
+
+    'rajaongkir' => [
+        'api_key' => env('RAJAONGKIR_API_KEY'),
+        'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
+        'origin_id' => env('RAJAONGKIR_ORIGIN_ID'),
+    ],
     
     'xendit' => [
         'secret_key' => env('XENDIT_SECRET_KEY'),

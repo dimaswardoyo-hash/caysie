@@ -155,10 +155,13 @@
                             </span>
                             Pilih Jasa Pengiriman
                         </h3>
-                        <p class="text-xs text-gray-500 mb-5 ml-10">
+                        <p class="text-xs text-gray-500 mb-3 ml-10">
                             <i class="fa-solid fa-location-dot text-primary mr-1"></i>
                             Dikirim dari: <strong>Gunungkidul, DI Yogyakarta</strong>
                         </p>
+
+                        {{-- Peta rute pengiriman --}}
+                        <div id="map-shipping" class="mb-5 border border-gray-100"></div>
 
                         {{-- Panduan --}}
                         <div id="box-guide"
@@ -352,7 +355,21 @@
 @endsection
 
 @push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <style>
+        #map-shipping {
+            height: 220px;
+            width: 100%;
+            border-radius: 0.75rem;
+            z-index: 0;
+        }
+
+        .leaflet-popup-content {
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
         .input-field {
             @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-primary transition;
             --tw-ring-color: rgb(108 99 255 / 0.2);
@@ -402,6 +419,125 @@
 @endpush
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+        // ═══════════════════════════════════════════════════════
+        // PETA RUTE PENGIRIMAN (Leaflet + OpenStreetMap)
+        // ═══════════════════════════════════════════════════════
+        // Koordinat toko: Wonosari, Gunungkidul, DI Yogyakarta
+        const ORIGIN_COORD = [-7.9666, 110.6081];
+
+        // Koordinat perkiraan per provinsi (ibu kota/centroid) — dipakai untuk
+        // menggambar rute karena API RajaOngkir/BinderByte tidak menyediakan lat/long.
+        const PROVINCE_COORDS = {
+            'ACEH': [5.5483, 95.3238],
+            'SUMATERA UTARA': [3.5952, 98.6722],
+            'SUMATERA BARAT': [-0.9471, 100.4172],
+            'RIAU': [0.5071, 101.4478],
+            'KEPULAUAN RIAU': [0.9186, 104.4658],
+            'JAMBI': [-1.6101, 103.6131],
+            'SUMATERA SELATAN': [-2.9909, 104.7566],
+            'BENGKULU': [-3.7928, 102.2608],
+            'LAMPUNG': [-5.4292, 105.2610],
+            'KEPULAUAN BANGKA BELITUNG': [-2.1316, 106.1169],
+            'DKI JAKARTA': [-6.2088, 106.8456],
+            'JAWA BARAT': [-6.9175, 107.6191],
+            'JAWA TENGAH': [-6.9667, 110.4167],
+            'DAERAH ISTIMEWA YOGYAKARTA': [-7.7956, 110.3695],
+            'JAWA TIMUR': [-7.2504, 112.7688],
+            'BANTEN': [-6.1783, 106.6319],
+            'BALI': [-8.6705, 115.2126],
+            'NUSA TENGGARA BARAT': [-8.5833, 116.1167],
+            'NUSA TENGGARA TIMUR': [-10.1772, 123.6070],
+            'KALIMANTAN BARAT': [-0.0263, 109.3425],
+            'KALIMANTAN TENGAH': [-1.6815, 113.3823],
+            'KALIMANTAN SELATAN': [-3.3194, 114.5908],
+            'KALIMANTAN TIMUR': [-0.5022, 117.1536],
+            'KALIMANTAN UTARA': [3.0731, 116.0414],
+            'SULAWESI UTARA': [1.4748, 124.8421],
+            'SULAWESI TENGAH': [-0.8917, 119.8707],
+            'SULAWESI SELATAN': [-5.1477, 119.4327],
+            'SULAWESI TENGGARA': [-3.9985, 122.5150],
+            'GORONTALO': [0.5435, 123.0568],
+            'SULAWESI BARAT': [-2.8441, 119.2321],
+            'MALUKU': [-3.6954, 128.1814],
+            'MALUKU UTARA': [0.7833, 127.3833],
+            'PAPUA': [-2.5333, 140.7167],
+            'PAPUA BARAT': [-0.8615, 134.0620],
+            'PAPUA TENGAH': [-3.3667, 136.1667],
+            'PAPUA PEGUNUNGAN': [-4.0833, 138.9667],
+            'PAPUA SELATAN': [-8.4667, 140.3833],
+            'PAPUA BARAT DAYA': [-0.8667, 131.2500],
+        };
+
+        function findProvinceCoord(name) {
+            const key = (name || '').toUpperCase().trim();
+            if (PROVINCE_COORDS[key]) return PROVINCE_COORDS[key];
+            // Partial match — antisipasi variasi nama dari API (mis. "JAWA TIMUR" vs "JATIM")
+            for (const k in PROVINCE_COORDS) {
+                if (key.includes(k) || k.includes(key)) return PROVINCE_COORDS[k];
+            }
+            return null;
+        }
+
+        let _map, _originMarker, _destMarker, _routeLine;
+
+        function initShippingMap() {
+            _map = L.map('map-shipping', {
+                zoomControl: true,
+                scrollWheelZoom: false,
+            }).setView(ORIGIN_COORD, 8);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 18,
+            }).addTo(_map);
+
+            _originMarker = L.marker(ORIGIN_COORD)
+                .addTo(_map)
+                .bindPopup('<b>Toko Caysie</b><br>Gunungkidul, DI Yogyakarta')
+                .openPopup();
+        }
+
+        function updateShippingMap(provinceName, cityName) {
+            const coord = findProvinceCoord(provinceName);
+            if (!_map || !coord) return;
+
+            const label = cityName ? `${cityName}, ${provinceName}` : provinceName;
+
+            if (_destMarker) _map.removeLayer(_destMarker);
+            if (_routeLine) _map.removeLayer(_routeLine);
+
+            _destMarker = L.marker(coord)
+                .addTo(_map)
+                .bindPopup(`<b>Tujuan</b><br>${label}`)
+                .openPopup();
+
+            _routeLine = L.polyline([ORIGIN_COORD, coord], {
+                color: '#6C63FF',
+                weight: 3,
+                dashArray: '6, 6',
+            }).addTo(_map);
+
+            _map.fitBounds(L.latLngBounds([ORIGIN_COORD, coord]), {
+                padding: [30, 30],
+            });
+        }
+
+        function clearShippingMapDestination() {
+            if (_destMarker) {
+                _map?.removeLayer(_destMarker);
+                _destMarker = null;
+            }
+            if (_routeLine) {
+                _map?.removeLayer(_routeLine);
+                _routeLine = null;
+            }
+            if (_map) _map.setView(ORIGIN_COORD, 8);
+        }
+
+        document.addEventListener('DOMContentLoaded', initShippingMap);
+    </script>
     <script>
         // ═══════════════════════════════════════════════════════
         // KONSTANTA
@@ -531,7 +667,12 @@
             selReset('sel-village', 'spin-village', '-- Pilih kecamatan dulu --');
             resetOngkir();
 
-            if (!id) return;
+            if (!id) {
+                clearShippingMapDestination();
+                return;
+            }
+
+            updateShippingMap(_province, null);
 
             selLoad('sel-city', 'spin-city', 'Memuat kota...');
             try {
@@ -568,8 +709,11 @@
             if (!id) {
                 _city = '';
                 _cityId = '';
+                updateShippingMap(_province, null);
                 return;
             }
+
+            updateShippingMap(_province, _city);
 
             // Tampilkan tombol cek ongkir
             show('box-guide', false);
