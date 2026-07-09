@@ -19,7 +19,8 @@
     @php
         $statusColors = [
             'pending' => 'yellow',
-            'paid' => 'blue',
+            'waiting_confirmation' => 'orange',
+            'confirmed' => 'blue',
             'processing' => 'purple',
             'shipped' => 'indigo',
             'delivered' => 'green',
@@ -27,7 +28,8 @@
         ];
         $statusLabels = [
             'pending' => 'Menunggu Bayar',
-            'paid' => 'Sudah Dibayar',
+            'waiting_confirmation' => 'Menunggu Konfirmasi',
+            'confirmed' => 'Sudah Dibayar',
             'processing' => 'Diproses',
             'shipped' => 'Dikirim',
             'delivered' => 'Selesai',
@@ -60,7 +62,7 @@
 
                 {{-- Progress Bar --}}
                 @php
-                    $steps = ['pending' => 0, 'paid' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4];
+                    $steps = ['pending' => 0, 'confirmed' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4];
                     $current = $steps[$order->status] ?? 0;
                     $stepLabels = ['Menunggu Bayar', 'Dibayar', 'Diproses', 'Dikirim', 'Selesai'];
                     $stepIcons = ['fa-clock', 'fa-money-bill', 'fa-gear', 'fa-truck', 'fa-circle-check'];
@@ -153,7 +155,7 @@
                                 <p class="font-bold text-gray-800 text-sm">
                                     {{ $order->paid_at->isoFormat('D MMM Y, HH:mm') }} WIB</p>
                             @endif
-                            @if ($order->status === 'pending' || $order->status === 'paid')
+                            @if ($order->status === 'pending' || $order->status === 'confirmed')
                                 <form action="{{ route('admin.orders.confirm', $order) }}" method="POST" class="mt-4">
                                     @csrf @method('PATCH')
                                     <button type="submit"

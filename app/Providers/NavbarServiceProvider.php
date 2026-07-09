@@ -29,7 +29,7 @@ class NavbarServiceProvider extends ServiceProvider
             $pendingCount = Order::where('user_id', $userId)->where('status', 'pending')->whereNull('payment_proof')->whereNotNull('payment_deadline')->where('payment_deadline', '>', now())->count();
 
             $activeOrderCount = Order::where('user_id', $userId)
-                ->whereIn('status', ['pending', 'paid', 'processing', 'shipped'])
+                ->whereIn('status', ['pending', 'confirmed', 'processing', 'shipped'])
                 ->count();
 
             // Statistik ringkasan

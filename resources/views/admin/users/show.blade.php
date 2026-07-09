@@ -38,7 +38,7 @@
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-400">Total Belanja</span>
                         <span class="font-black text-primary">
-                            Rp{{ number_format($user->orders->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])->sum('total'), 0, ',', '.') }}
+                            Rp{{ number_format($user->orders->whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])->sum('total'), 0, ',', '.') }}
                         </span>
                     </div>
                     <div class="flex justify-between text-sm">
@@ -64,7 +64,7 @@
                             $sc =
                                 [
                                     'pending' => 'yellow',
-                                    'paid' => 'blue',
+                                    'confirmed' => 'blue',
                                     'processing' => 'purple',
                                     'shipped' => 'indigo',
                                     'delivered' => 'green',
@@ -73,7 +73,7 @@
                             $sl =
                                 [
                                     'pending' => 'Menunggu',
-                                    'paid' => 'Dibayar',
+                                    'confirmed' => 'Dibayar',
                                     'processing' => 'Diproses',
                                     'shipped' => 'Dikirim',
                                     'delivered' => 'Selesai',

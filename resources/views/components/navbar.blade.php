@@ -99,7 +99,7 @@
                                                 'label' => 'Menunggu Bayar',
                                                 'text' => 'text-yellow-800',
                                             ],
-                                            'paid' => [
+                                            'confirmed' => [
                                                 'dot' => 'bg-blue-400',
                                                 'bg' => 'bg-blue-50',
                                                 'border' => 'border-blue-200',

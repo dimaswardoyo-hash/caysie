@@ -60,7 +60,7 @@
 
                 {{-- Progress --}}
                 @php
-                    $steps = ['pending' => 0, 'paid' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4];
+                    $steps = ['pending' => 0, 'confirmed' => 1, 'processing' => 2, 'shipped' => 3, 'delivered' => 4];
                     $current = $steps[$order->status] ?? 0;
                     $labels = ['Menunggu Bayar', 'Dibayar', 'Diproses', 'Dikirim', 'Selesai'];
                     $icons = ['fa-clock', 'fa-money-bill', 'fa-gear', 'fa-truck', 'fa-circle-check'];
@@ -223,6 +223,20 @@
                         <p class="text-gray-400 text-xs mb-1">Kurir</p>
                         <p class="font-bold text-gray-800">{{ $order->courier_name }} — {{ $order->courier_service }}</p>
                         <p class="text-xs text-gray-400">Estimasi {{ $order->shipping_estimate }} hari kerja</p>
+
+                        @if ($order->tracking_number)
+                            <div class="flex items-center justify-between gap-3 mt-3 bg-gray-50 rounded-xl px-3.5 py-2.5">
+                                <div class="min-w-0">
+                                    <p class="text-[11px] text-gray-400">No. Resi</p>
+                                    <p class="font-mono font-bold text-gray-700 text-xs truncate">
+                                        {{ $order->tracking_number }}</p>
+                                </div>
+                                <button onclick="openTrackingModal()"
+                                    class="flex-shrink-0 inline-flex items-center gap-1.5 bg-primary text-white text-xs font-bold px-3.5 py-2 rounded-lg hover:bg-primary-dark transition">
+                                    <i class="fa-solid fa-truck-fast text-xs"></i> Lacak Paket
+                                </button>
+                            </div>
+                        @endif
                     </div>
                     <div class="pt-3 border-t border-gray-100">
                         <p class="text-gray-400 text-xs mb-1">Alamat Penerima</p>
@@ -302,11 +316,261 @@
                 document.body.style.overflow = '';
             }
         });
+
+        // ── Modal Lacak Paket ─────────────────────────────────
+        const TRACKING_URL = '{{ $order->tracking_number ? route('api.tracking.order', $order) : '' }}';
+        let trackingLoaded = false;
+
+        function openTrackingModal() {
+            if (!TRACKING_URL) return;
+            document.getElementById('modal-tracking').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (!trackingLoaded) fetchTracking();
+        }
+
+        function closeTrackingModal() {
+            document.getElementById('modal-tracking').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modal-tracking')?.addEventListener('click', function(e) {
+            if (e.target === this) closeTrackingModal();
+        });
+
+        async function fetchTracking() {
+            const loadingEl = document.getElementById('tracking-loading');
+            const errorEl = document.getElementById('tracking-error');
+            const contentEl = document.getElementById('tracking-content');
+
+            loadingEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            contentEl.classList.add('hidden');
+
+            try {
+                const res = await fetch(TRACKING_URL, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const json = await res.json();
+
+                loadingEl.classList.add('hidden');
+
+                if (!res.ok || !json.success) {
+                    showTrackingError(json?.data?.error || json?.message ||
+                        'Belum ada update dari kurir untuk nomor resi ini.');
+                    return;
+                }
+
+                renderTracking(json.data || {});
+                trackingLoaded = true;
+                contentEl.classList.remove('hidden');
+            } catch (e) {
+                loadingEl.classList.add('hidden');
+                showTrackingError('Koneksi gagal. Periksa internet kamu lalu coba lagi.');
+            }
+        }
+
+        function showTrackingError(message) {
+            document.getElementById('tracking-error-message').textContent = message;
+            document.getElementById('tracking-error').classList.remove('hidden');
+        }
+
+        function trackingStatusMeta(status) {
+            const s = (status || '').toString().toUpperCase();
+            if (s.includes('DELIVER') || s.includes('TERKIRIM') || s.includes('SELESAI')) {
+                return {
+                    color: 'green',
+                    icon: 'fa-circle-check',
+                    label: 'Sudah Diterima'
+                };
+            }
+            if (s.includes('RETUR') || s.includes('GAGAL') || s.includes('CANCEL') || s.includes('BATAL')) {
+                return {
+                    color: 'red',
+                    icon: 'fa-circle-xmark',
+                    label: 'Ada Masalah Pengiriman'
+                };
+            }
+            if (s.includes('TRANSIT') || s.includes('ANTAR') || s.includes('KIRIM') || s.includes('PROSES')) {
+                return {
+                    color: 'blue',
+                    icon: 'fa-truck-fast',
+                    label: 'Dalam Perjalanan'
+                };
+            }
+            return {
+                color: 'yellow',
+                icon: 'fa-box',
+                label: status || 'Diproses'
+            };
+        }
+
+        function renderTracking(data) {
+            const summary = data.summary || {};
+            const history = Array.isArray(data.history) ? data.history : [];
+            const meta = trackingStatusMeta(summary.status);
+
+            document.getElementById('tracking-summary').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="w-11 h-11 rounded-xl bg-${meta.color}-100 text-${meta.color}-600 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid ${meta.icon}"></i>
+                    </span>
+                    <div class="min-w-0">
+                        <p class="font-black text-gray-800 text-sm">${meta.label}</p>
+                        <p class="text-xs text-gray-400 truncate">${escapeHtml(summary.courier || '')}${summary.courier ? ' · ' : ''}No. Resi ${escapeHtml(summary.awb || '-')}</p>
+                    </div>
+                </div>
+            `;
+
+            const timelineEl = document.getElementById('tracking-timeline');
+
+            if (history.length === 0) {
+                timelineEl.innerHTML =
+                    '<p class="text-xs text-gray-400 text-center py-6">Belum ada riwayat perjalanan dari kurir.</p>';
+                return;
+            }
+
+            timelineEl.innerHTML = history.map((h, i) => `
+                <div class="flex gap-3">
+                    <div class="flex flex-col items-center flex-shrink-0 pt-1">
+                        <span class="w-2.5 h-2.5 rounded-full ${i === 0 ? 'bg-primary' : 'bg-gray-300'} flex-shrink-0"></span>
+                        ${i < history.length - 1 ? '<span class="w-px flex-1 bg-gray-200 my-1"></span>' : ''}
+                    </div>
+                    <div class="pb-4 min-w-0 flex-1">
+                        <p class="text-xs leading-relaxed ${i === 0 ? 'font-bold text-gray-800' : 'text-gray-500'}">${escapeHtml(h.desc || '-')}</p>
+                        <p class="text-[11px] text-gray-400 mt-1">${h.location ? escapeHtml(h.location) + ' · ' : ''}${formatTrackDate(h.date)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
+
+        function formatTrackDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(String(dateStr).replace(' ', 'T'));
+            if (isNaN(d.getTime())) return escapeHtml(dateStr);
+            return d.toLocaleString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
     </script>
 
-    {{-- Modal Cancel (copy dari orders.blade.php bagian modal-cancel) --}}
+    {{-- Modal Cancel --}}
     <div id="modal-cancel" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
         style="background:rgba(0,0,0,0.5)">
-        {{-- ... isi modal sama persis seperti di orders.blade.php ... --}}
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-black text-gray-800 text-lg">Batalkan Pesanan</h3>
+                <button onclick="closeCancelModal()"
+                    class="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition text-gray-500">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form id="form-cancel" method="POST">
+                @csrf
+
+                <div class="bg-red-50 border border-red-100 rounded-2xl p-4 mb-5 flex gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg flex-shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="font-bold text-red-800 text-sm mb-1">Yakin ingin membatalkan?</p>
+                        <p class="text-xs text-red-600 leading-relaxed">
+                            Pesanan <strong id="cancel-order-code"></strong> akan dibatalkan dan stok produk dikembalikan.
+                            Tindakan ini tidak dapat diurungkan.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                        Alasan Pembatalan <span class="text-red-500">*</span>
+                    </label>
+                    <div class="space-y-2 mb-3">
+                        @foreach (['Saya ingin mengubah produk/ukuran', 'Saya menemukan harga lebih murah', 'Pesanan dibuat tidak sengaja', 'Ingin mengubah alamat pengiriman', 'Lainnya'] as $reason)
+                            <label
+                                class="flex items-center gap-3 p-3 border border-gray-100 rounded-xl cursor-pointer hover:border-primary hover:bg-purple-50 transition">
+                                <input type="radio" name="cancel_reason" value="{{ $reason }}"
+                                    class="accent-primary" onchange="toggleOtherReason(this)">
+                                <span class="text-sm text-gray-700">{{ $reason }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <textarea id="other-reason" name="cancel_reason_other" rows="2" placeholder="Tuliskan alasan pembatalan..."
+                        class="hidden w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary transition resize-none"></textarea>
+                    @error('cancel_reason')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeCancelModal()"
+                        class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-200 transition">
+                        Tidak, Kembali
+                    </button>
+                    <button type="submit" id="btn-cancel-submit"
+                        class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-sm hover:bg-red-600 transition shadow-lg shadow-red-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-xmark"></i> Ya, Batalkan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Modal Lacak Paket --}}
+    <div id="modal-tracking" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+        style="background:rgba(0,0,0,0.5)">
+        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 pt-6 pb-4 flex-shrink-0 border-b border-gray-100">
+                <div>
+                    <h3 class="font-black text-gray-800 text-lg">Lacak Paket</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ $order->order_code }}</p>
+                </div>
+                <button onclick="closeTrackingModal()"
+                    class="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition text-gray-500 flex-shrink-0">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            {{-- Body (scrollable) --}}
+            <div class="px-6 py-5 overflow-y-auto flex-1">
+
+                {{-- Loading --}}
+                <div id="tracking-loading" class="py-12 text-center">
+                    <div class="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"
+                        style="border-width:3px"></div>
+                    <p class="text-xs text-gray-400">Mengambil data pelacakan...</p>
+                </div>
+
+                {{-- Error --}}
+                <div id="tracking-error" class="hidden py-8 text-center">
+                    <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                    </div>
+                    <p id="tracking-error-message" class="text-sm text-gray-500 px-4 leading-relaxed"></p>
+                </div>
+
+                {{-- Content --}}
+                <div id="tracking-content" class="hidden">
+                    {{-- Ringkasan status --}}
+                    <div id="tracking-summary" class="bg-gray-50 rounded-2xl p-4 mb-5"></div>
+
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Riwayat Perjalanan</p>
+                    <div id="tracking-timeline"></div>
+                </div>
+            </div>
+        </div>
     </div>
 @endpush

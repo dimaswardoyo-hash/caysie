@@ -144,14 +144,14 @@
                             @php
                                 $sc =
                                     [
-                                        'paid' => 'blue',
+                                        'confirmed' => 'blue',
                                         'processing' => 'purple',
                                         'shipped' => 'indigo',
                                         'delivered' => 'green',
                                     ][$order->status] ?? 'gray';
                                 $sl =
                                     [
-                                        'paid' => 'Dibayar',
+                                        'confirmed' => 'Dibayar',
                                         'processing' => 'Diproses',
                                         'shipped' => 'Dikirim',
                                         'delivered' => 'Selesai',
@@ -235,8 +235,7 @@
                     tooltip: {
                         callbacks: {
                             label: ctx => ctx.datasetIndex === 0 ?
-                                ' Rp' + ctx.parsed.y.toLocaleString('id-ID') :
-                                ' ' + ctx.parsed.y + ' pesanan'
+                                ' Rp' + ctx.parsed.y.toLocaleString('id-ID') : ' ' + ctx.parsed.y + ' pesanan'
                         }
                     }
                 },

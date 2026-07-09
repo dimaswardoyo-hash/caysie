@@ -32,7 +32,7 @@
             $tabList = [
                 '' => 'Semua',
                 'pending' => 'Menunggu Bayar',
-                'paid' => 'Sudah Dibayar',
+                'confirmed' => 'Sudah Dibayar',
                 'processing' => 'Diproses',
                 'shipped' => 'Dikirim',
                 'delivered' => 'Selesai',
@@ -40,7 +40,7 @@
             ];
             $tabColors = [
                 'pending' => 'yellow',
-                'paid' => 'blue',
+                'confirmed' => 'blue',
                 'processing' => 'purple',
                 'shipped' => 'indigo',
                 'delivered' => 'green',
@@ -456,7 +456,7 @@
                     `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
                 // Warna merah jika < 1 jam
-                if (secs < 8600) el.classList.add('text-red-600');
+                if (secs < 3600) el.classList.add('text-red-600');
             }, 1000);
         });
 

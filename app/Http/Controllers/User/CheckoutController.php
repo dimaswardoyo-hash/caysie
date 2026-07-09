@@ -250,6 +250,51 @@ class CheckoutController extends Controller
         }
     }
 
+    // ── Upload bukti pembayaran (transfer manual) ────────────
+    public function uploadProof(Request $request, Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Hanya pesanan yang masih pending & belum lewat deadline yang bisa diupload buktinya
+        if (!$order->can_pay) {
+            return back()->with('error', 'Pesanan ini sudah tidak bisa diupload bukti pembayarannya.');
+        }
+
+        $request->validate(
+            [
+                'payment_proof' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            ],
+            [
+                'payment_proof.required' => 'Foto bukti transfer wajib diupload.',
+                'payment_proof.image' => 'File harus berupa gambar.',
+                'payment_proof.mimes' => 'Format gambar harus JPG atau PNG.',
+                'payment_proof.max' => 'Ukuran gambar maksimal 2MB.',
+            ],
+        );
+
+        // Hapus bukti lama jika user upload ulang
+        if ($order->payment_proof) {
+            Storage::disk('public')->delete($order->payment_proof);
+        }
+
+        $path = $request->file('payment_proof')->store('payment-proofs', 'public');
+
+        $order->update([
+            'payment_proof' => $path,
+        ]);
+
+        Log::info('[Checkout] Bukti pembayaran diupload', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+        ]);
+
+        return redirect()
+            ->route('user.orders')
+            ->with('success', 'Bukti pembayaran untuk pesanan #' . $order->order_code . ' berhasil dikirim. Admin akan memverifikasi dalam 1×24 jam.');
+    }
+
     // ── Callback: Xendit redirect setelah BERHASIL bayar ─────
     public function paymentSuccess(Order $order)
     {
