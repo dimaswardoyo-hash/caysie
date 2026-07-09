@@ -14,7 +14,7 @@
     @php
         $tabColors = [
             'pending' => 'yellow',
-            'paid' => 'blue',
+            'confirmed' => 'blue',
             'processing' => 'purple',
             'shipped' => 'indigo',
             'delivered' => 'green',
@@ -22,7 +22,7 @@
         ];
         $tabLabels = [
             'pending' => 'Menunggu Bayar',
-            'paid' => 'Sudah Dibayar',
+            'confirmed' => 'Sudah Dibayar',
             'processing' => 'Diproses',
             'shipped' => 'Dikirim',
             'delivered' => 'Selesai',
