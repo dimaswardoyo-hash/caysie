@@ -14,17 +14,17 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {{-- ══════════════ KIRI ══════════════ --}}
-                <div class="lg:col-span-2 space-y-6">
+                <div class="lg:col-span-2 space-y-5">
 
                     {{-- IDENTITAS --}}
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        <h3 class="font-black text-gray-800 mb-5 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-purple-100 text-primary rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-user text-sm"></i>
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 bg-purple-100 text-primary rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-user text-xs"></i>
                             </span>
                             Identitas Penerima
                         </h3>
-                        <div class="space-y-4">
+                        <div class="space-y-3">
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
@@ -53,115 +53,116 @@
                                 </div>
                             </div>
 
-                            {{-- Provinsi --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Provinsi <span class="text-red-500">*</span>
-                                </label>
-                                <div class="select-wrap">
-                                    <select id="sel-province" name="receiver_province" required
-                                        class="input-field appearance-none pr-10 @error('receiver_province') border-red-400 @enderror">
-                                        <option value="">Memuat provinsi...</option>
-                                    </select>
-                                    <span id="spin-province" class="select-spinner hidden"></span>
-                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                            {{-- Provinsi + Kota --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                                        Provinsi <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="select-wrap">
+                                        <select id="sel-province" name="receiver_province" required
+                                            class="input-field appearance-none pr-10 @error('receiver_province') border-red-400 @enderror">
+                                            <option value="">Memuat provinsi...</option>
+                                        </select>
+                                        <span id="spin-province" class="select-spinner hidden"></span>
+                                        <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <input type="hidden" id="hid-province-id" name="receiver_province_id">
+                                    @error('receiver_province')
+                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
-                                <input type="hidden" id="hid-province-id" name="receiver_province_id">
-                                @error('receiver_province')
-                                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
 
-                            {{-- Kota --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Kota / Kabupaten <span class="text-red-500">*</span>
-                                </label>
-                                <div class="select-wrap">
-                                    <select id="sel-city" name="receiver_city" required disabled
-                                        class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400 @error('receiver_city') border-red-400 @enderror">
-                                        <option value="">-- Pilih provinsi dulu --</option>
-                                    </select>
-                                    <span id="spin-city" class="select-spinner hidden"></span>
-                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
-                                </div>
-                                {{-- ID kota dikirim ke OngkirController untuk query BinderByte --}}
-                                <input type="hidden" id="hid-city-id" name="receiver_city_id">
-                                @error('receiver_city')
-                                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Kecamatan --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Kecamatan <span class="text-gray-400 font-normal">(opsional)</span>
-                                </label>
-                                <div class="select-wrap">
-                                    <select id="sel-district" name="receiver_district" disabled
-                                        class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400">
-                                        <option value="">-- Pilih kota dulu --</option>
-                                    </select>
-                                    <span id="spin-district" class="select-spinner hidden"></span>
-                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
-                                </div>
-                                <input type="hidden" id="hid-district-id" name="receiver_district_id">
-                            </div>
-
-                            {{-- Kelurahan --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Kelurahan / Desa <span class="text-gray-400 font-normal">(opsional)</span>
-                                </label>
-                                <div class="select-wrap">
-                                    <select id="sel-village" name="receiver_village" disabled
-                                        class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400">
-                                        <option value="">-- Pilih kecamatan dulu --</option>
-                                    </select>
-                                    <span id="spin-village" class="select-spinner hidden"></span>
-                                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                                        Kota / Kabupaten <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="select-wrap">
+                                        <select id="sel-city" name="receiver_city" required disabled
+                                            class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400 @error('receiver_city') border-red-400 @enderror">
+                                            <option value="">-- Pilih provinsi dulu --</option>
+                                        </select>
+                                        <span id="spin-city" class="select-spinner hidden"></span>
+                                        <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    {{-- ID kota dikirim ke OngkirController untuk query BinderByte --}}
+                                    <input type="hidden" id="hid-city-id" name="receiver_city_id">
+                                    @error('receiver_city')
+                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
                             </div>
 
-                            {{-- Alamat --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Alamat Lengkap <span class="text-red-500">*</span>
-                                </label>
-                                <textarea name="receiver_address" rows="3" required placeholder="Nama jalan, nomor rumah, RT/RW, patokan..."
-                                    class="input-field resize-none @error('receiver_address') border-red-400 @enderror">{{ old('receiver_address') }}</textarea>
-                                @error('receiver_address')
-                                    <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                @enderror
+                            {{-- Kecamatan + Kelurahan --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                                        Kecamatan <span class="text-gray-400 font-normal">(opsional)</span>
+                                    </label>
+                                    <div class="select-wrap">
+                                        <select id="sel-district" name="receiver_district" disabled
+                                            class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400">
+                                            <option value="">-- Pilih kota dulu --</option>
+                                        </select>
+                                        <span id="spin-district" class="select-spinner hidden"></span>
+                                        <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <input type="hidden" id="hid-district-id" name="receiver_district_id">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                                        Kelurahan / Desa <span class="text-gray-400 font-normal">(opsional)</span>
+                                    </label>
+                                    <div class="select-wrap">
+                                        <select id="sel-village" name="receiver_village" disabled
+                                            class="input-field appearance-none pr-10 disabled:bg-gray-50 disabled:text-gray-400">
+                                            <option value="">-- Pilih kecamatan dulu --</option>
+                                        </select>
+                                        <span id="spin-village" class="select-spinner hidden"></span>
+                                        <i class="fa-solid fa-chevron-down select-arrow"></i>
+                                    </div>
+                                </div>
                             </div>
 
-                            {{-- Kode Pos --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1.5">
-                                    Kode Pos <span class="text-gray-400 font-normal">(opsional)</span>
-                                </label>
-                                <input type="text" name="receiver_postal_code" value="{{ old('receiver_postal_code') }}"
-                                    placeholder="Contoh: 55801" maxlength="10" class="input-field">
+                            {{-- Alamat + Kode Pos --}}
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                                        Alamat Lengkap <span class="text-red-500">*</span>
+                                    </label>
+                                    <textarea name="receiver_address" rows="3" required placeholder="Nama jalan, nomor rumah, RT/RW, patokan..."
+                                        class="input-field textarea-clean resize-none @error('receiver_address') border-red-400 @enderror">{{ old('receiver_address') }}</textarea>
+                                    @error('receiver_address')
+                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="sm:w-36 flex-shrink-0">
+                                    <label class="block text-xs font-bold text-gray-600 mb-1.5 whitespace-nowrap">
+                                        Kode Pos <span class="text-gray-400 font-normal">(opsional)</span>
+                                    </label>
+                                    <input type="text" name="receiver_postal_code"
+                                        value="{{ old('receiver_postal_code') }}" placeholder="55801" maxlength="10"
+                                        class="input-field">
+                                </div>
                             </div>
 
                         </div>
                     </div>
 
                     {{-- ONGKIR --}}
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" id="section-ongkir">
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm" id="section-ongkir">
                         <h3 class="font-black text-gray-800 mb-1 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-truck text-sm"></i>
+                            <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-truck text-xs"></i>
                             </span>
                             Pilih Jasa Pengiriman
                         </h3>
-                        <p class="text-xs text-gray-500 mb-3 ml-10">
+                        <p class="text-xs text-gray-500 mb-4 ml-9">
                             <i class="fa-solid fa-location-dot text-primary mr-1"></i>
                             Dikirim dari: <strong>Gunungkidul, DI Yogyakarta</strong>
                         </p>
-
-                        {{-- Peta rute pengiriman --}}
-                        <div id="map-shipping" class="mb-5 border border-gray-100"></div>
 
                         {{-- Panduan --}}
                         <div id="box-guide"
@@ -204,8 +205,43 @@
                             </button>
                         </div>
 
-                        {{-- Hasil --}}
-                        <div id="box-results" class="hidden space-y-2"></div>
+                        {{-- Hasil: ringkasan info + dropdown pilihan kurir --}}
+                        <div id="box-results" class="hidden">
+                            <div id="ongkir-info"
+                                class="flex items-center justify-between flex-wrap gap-2
+                                        bg-gray-50 rounded-xl px-4 py-3 mb-3 text-xs text-gray-600">
+                            </div>
+
+                            <div id="ongkir-dropdown"
+                                class="border-2 border-gray-100 rounded-2xl overflow-hidden transition-colors">
+                                {{-- Tombol utama: menampilkan pilihan terpilih, atau ajakan memilih --}}
+                                <button type="button" id="ongkir-toggle" onclick="toggleOngkirList()"
+                                    class="w-full flex items-center gap-3 p-3.5 bg-white hover:bg-gray-50
+                                           transition text-left">
+                                    <div id="ongkir-toggle-icon"
+                                        class="w-11 h-11 bg-gray-50 border border-gray-200 rounded-xl flex items-center
+                                               justify-center text-xl flex-shrink-0 transition-colors">
+                                        <i class="fa-solid fa-truck-fast text-gray-300 text-base"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="ongkir-toggle-title" class="font-black text-gray-400 text-sm truncate">
+                                            Pilih jasa pengiriman
+                                        </p>
+                                        <p id="ongkir-toggle-sub" class="text-xs text-gray-400 truncate">
+                                            Tap untuk melihat pilihan yang tersedia
+                                        </p>
+                                    </div>
+                                    <div id="ongkir-toggle-price" class="text-right flex-shrink-0"></div>
+                                    <i id="ongkir-toggle-chevron"
+                                        class="fa-solid fa-chevron-down text-gray-300 text-xs flex-shrink-0 transition-transform duration-200"></i>
+                                </button>
+
+                                {{-- Panel daftar pilihan kurir (dropdown) --}}
+                                <div id="ongkir-list-panel"
+                                    class="hidden border-t border-gray-100 bg-gray-50/60 p-2.5 space-y-2 max-h-80 overflow-y-auto">
+                                </div>
+                            </div>
+                        </div>
 
                         {{-- Hidden inputs — dikirim ke CheckoutController --}}
                         <input type="hidden" name="courier_code" id="val-code">
@@ -222,65 +258,32 @@
                         @enderror
                     </div>
 
-                    {{-- TRACKING RESI (opsional) --}}
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                            </span>
-                            Cek Resi Pengiriman
-                            <span class="font-normal text-gray-400 text-sm ml-1">(pesanan sebelumnya)</span>
-                        </h3>
-                        <div class="flex gap-2">
-                            <select id="trk-courier" class="input-field w-40 flex-shrink-0">
-                                <option value="jne">JNE</option>
-                                <option value="jnt">J&T</option>
-                                <option value="sicepat">SiCepat</option>
-                                <option value="anteraja">Anteraja</option>
-                                <option value="pos">POS</option>
-                                <option value="tiki">TIKI</option>
-                                <option value="ninja">Ninja</option>
-                                <option value="lion">Lion</option>
-                                <option value="ide">ID Express</option>
-                                <option value="sap">SAP</option>
-                            </select>
-                            <input type="text" id="trk-awb" placeholder="Masukkan nomor resi..."
-                                class="input-field flex-1">
-                            <button type="button" onclick="cekResi()"
-                                class="px-5 py-3 bg-green-600 text-white text-sm font-bold rounded-xl
-                                       hover:bg-green-700 transition flex-shrink-0">
-                                <i class="fa-solid fa-search mr-1"></i> Lacak
-                            </button>
-                        </div>
-                        <div id="trk-loading" class="hidden mt-3 text-sm text-gray-500 flex items-center gap-2">
-                            <div class="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin">
-                            </div>
-                            Melacak paket...
-                        </div>
-                        <div id="trk-result" class="hidden mt-3"></div>
-                    </div>
-
                     {{-- CATATAN --}}
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                        <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                        <h3 class="font-black text-gray-800 mb-1 flex items-center gap-2">
                             <span
-                                class="w-8 h-8 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-note-sticky text-sm"></i>
+                                class="w-7 h-7 bg-yellow-100 text-yellow-600 rounded-lg flex items-center justify-center">
+                                <i class="fa-solid fa-note-sticky text-xs"></i>
                             </span>
-                            Catatan <span class="font-normal text-gray-400 text-sm ml-1">(opsional)</span>
+                            Catatan Pesanan <span class="font-normal text-gray-400 text-sm ml-1">(opsional)</span>
                         </h3>
-                        <textarea name="notes" rows="2" placeholder="Titip tetangga, warna pintu, patokan rumah, dll."
-                            class="input-field resize-none">{{ old('notes') }}</textarea>
+                        <p class="text-xs text-gray-400 mb-3 ml-9">Contoh: titip tetangga, warna pintu, patokan rumah.
+                        </p>
+                        <textarea name="notes" id="notes-field" rows="4" maxlength="250"
+                            placeholder="Tulis catatan untuk kurir atau penjual di sini..." class="input-field textarea-clean resize-none">{{ old('notes') }}</textarea>
+                        <p class="text-[11px] text-gray-300 text-right mt-1">
+                            <span id="notes-count">0</span>/250
+                        </p>
                     </div>
 
                 </div>
 
                 {{-- ══════════════ KANAN: Ringkasan ══════════════ --}}
                 <div>
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm sticky top-24">
-                        <h3 class="font-black text-gray-800 mb-5">Ringkasan Pesanan</h3>
+                    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm sticky top-24">
+                        <h3 class="font-black text-gray-800 mb-4">Ringkasan Pesanan</h3>
 
-                        <div class="space-y-3 mb-5 pb-4 border-b border-gray-100 max-h-56 overflow-y-auto">
+                        <div class="space-y-3 mb-4 pb-4 border-b border-gray-100 max-h-56 overflow-y-auto">
                             @foreach ($carts as $cart)
                                 <div class="flex gap-3 items-center">
                                     <div class="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
@@ -355,24 +358,36 @@
 @endsection
 
 @push('styles')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <style>
-        #map-shipping {
-            height: 220px;
-            width: 100%;
-            border-radius: 0.75rem;
-            z-index: 0;
-        }
-
-        .leaflet-popup-content {
-            font-family: 'Inter', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
         .input-field {
-            @apply w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-primary transition;
+            @apply w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-primary transition;
             --tw-ring-color: rgb(108 99 255 / 0.2);
+        }
+
+        /* Textarea dengan scrollbar tipis & konsisten (tanpa tombol panah bawaan browser) */
+        .textarea-clean {
+            line-height: 1.5;
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db transparent;
+        }
+
+        .textarea-clean::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .textarea-clean::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .textarea-clean::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 999px;
+        }
+
+        .textarea-clean::-webkit-scrollbar-button {
+            display: none;
+            height: 0;
+            width: 0;
         }
 
         .select-wrap {
@@ -415,129 +430,26 @@
         #box-loading.flex {
             display: flex;
         }
+
+        #ongkir-list-panel {
+            animation: dropdown-in .18s ease;
+        }
+
+        @keyframes dropdown-in {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 @endpush
 
 @push('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    <script>
-        // ═══════════════════════════════════════════════════════
-        // PETA RUTE PENGIRIMAN (Leaflet + OpenStreetMap)
-        // ═══════════════════════════════════════════════════════
-        // Koordinat toko: Wonosari, Gunungkidul, DI Yogyakarta
-        const ORIGIN_COORD = [-7.9666, 110.6081];
-
-        // Koordinat perkiraan per provinsi (ibu kota/centroid) — dipakai untuk
-        // menggambar rute karena API RajaOngkir/BinderByte tidak menyediakan lat/long.
-        const PROVINCE_COORDS = {
-            'ACEH': [5.5483, 95.3238],
-            'SUMATERA UTARA': [3.5952, 98.6722],
-            'SUMATERA BARAT': [-0.9471, 100.4172],
-            'RIAU': [0.5071, 101.4478],
-            'KEPULAUAN RIAU': [0.9186, 104.4658],
-            'JAMBI': [-1.6101, 103.6131],
-            'SUMATERA SELATAN': [-2.9909, 104.7566],
-            'BENGKULU': [-3.7928, 102.2608],
-            'LAMPUNG': [-5.4292, 105.2610],
-            'KEPULAUAN BANGKA BELITUNG': [-2.1316, 106.1169],
-            'DKI JAKARTA': [-6.2088, 106.8456],
-            'JAWA BARAT': [-6.9175, 107.6191],
-            'JAWA TENGAH': [-6.9667, 110.4167],
-            'DAERAH ISTIMEWA YOGYAKARTA': [-7.7956, 110.3695],
-            'JAWA TIMUR': [-7.2504, 112.7688],
-            'BANTEN': [-6.1783, 106.6319],
-            'BALI': [-8.6705, 115.2126],
-            'NUSA TENGGARA BARAT': [-8.5833, 116.1167],
-            'NUSA TENGGARA TIMUR': [-10.1772, 123.6070],
-            'KALIMANTAN BARAT': [-0.0263, 109.3425],
-            'KALIMANTAN TENGAH': [-1.6815, 113.3823],
-            'KALIMANTAN SELATAN': [-3.3194, 114.5908],
-            'KALIMANTAN TIMUR': [-0.5022, 117.1536],
-            'KALIMANTAN UTARA': [3.0731, 116.0414],
-            'SULAWESI UTARA': [1.4748, 124.8421],
-            'SULAWESI TENGAH': [-0.8917, 119.8707],
-            'SULAWESI SELATAN': [-5.1477, 119.4327],
-            'SULAWESI TENGGARA': [-3.9985, 122.5150],
-            'GORONTALO': [0.5435, 123.0568],
-            'SULAWESI BARAT': [-2.8441, 119.2321],
-            'MALUKU': [-3.6954, 128.1814],
-            'MALUKU UTARA': [0.7833, 127.3833],
-            'PAPUA': [-2.5333, 140.7167],
-            'PAPUA BARAT': [-0.8615, 134.0620],
-            'PAPUA TENGAH': [-3.3667, 136.1667],
-            'PAPUA PEGUNUNGAN': [-4.0833, 138.9667],
-            'PAPUA SELATAN': [-8.4667, 140.3833],
-            'PAPUA BARAT DAYA': [-0.8667, 131.2500],
-        };
-
-        function findProvinceCoord(name) {
-            const key = (name || '').toUpperCase().trim();
-            if (PROVINCE_COORDS[key]) return PROVINCE_COORDS[key];
-            // Partial match — antisipasi variasi nama dari API (mis. "JAWA TIMUR" vs "JATIM")
-            for (const k in PROVINCE_COORDS) {
-                if (key.includes(k) || k.includes(key)) return PROVINCE_COORDS[k];
-            }
-            return null;
-        }
-
-        let _map, _originMarker, _destMarker, _routeLine;
-
-        function initShippingMap() {
-            _map = L.map('map-shipping', {
-                zoomControl: true,
-                scrollWheelZoom: false,
-            }).setView(ORIGIN_COORD, 8);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 18,
-            }).addTo(_map);
-
-            _originMarker = L.marker(ORIGIN_COORD)
-                .addTo(_map)
-                .bindPopup('<b>Toko Caysie</b><br>Gunungkidul, DI Yogyakarta')
-                .openPopup();
-        }
-
-        function updateShippingMap(provinceName, cityName) {
-            const coord = findProvinceCoord(provinceName);
-            if (!_map || !coord) return;
-
-            const label = cityName ? `${cityName}, ${provinceName}` : provinceName;
-
-            if (_destMarker) _map.removeLayer(_destMarker);
-            if (_routeLine) _map.removeLayer(_routeLine);
-
-            _destMarker = L.marker(coord)
-                .addTo(_map)
-                .bindPopup(`<b>Tujuan</b><br>${label}`)
-                .openPopup();
-
-            _routeLine = L.polyline([ORIGIN_COORD, coord], {
-                color: '#6C63FF',
-                weight: 3,
-                dashArray: '6, 6',
-            }).addTo(_map);
-
-            _map.fitBounds(L.latLngBounds([ORIGIN_COORD, coord]), {
-                padding: [30, 30],
-            });
-        }
-
-        function clearShippingMapDestination() {
-            if (_destMarker) {
-                _map?.removeLayer(_destMarker);
-                _destMarker = null;
-            }
-            if (_routeLine) {
-                _map?.removeLayer(_routeLine);
-                _routeLine = null;
-            }
-            if (_map) _map.setView(ORIGIN_COORD, 8);
-        }
-
-        document.addEventListener('DOMContentLoaded', initShippingMap);
-    </script>
     <script>
         // ═══════════════════════════════════════════════════════
         // KONSTANTA
@@ -667,12 +579,7 @@
             selReset('sel-village', 'spin-village', '-- Pilih kecamatan dulu --');
             resetOngkir();
 
-            if (!id) {
-                clearShippingMapDestination();
-                return;
-            }
-
-            updateShippingMap(_province, null);
+            if (!id) return;
 
             selLoad('sel-city', 'spin-city', 'Memuat kota...');
             try {
@@ -709,11 +616,8 @@
             if (!id) {
                 _city = '';
                 _cityId = '';
-                updateShippingMap(_province, null);
                 return;
             }
-
-            updateShippingMap(_province, _city);
 
             // Tampilkan tombol cek ongkir
             show('box-guide', false);
@@ -778,7 +682,8 @@
             show('box-loading', true);
             show('box-error', false);
             show('box-results', false);
-            $('box-results').innerHTML = '';
+            $('ongkir-info').innerHTML = '';
+            $('ongkir-list-panel').innerHTML = '';
             resetKurir();
 
             try {
@@ -819,15 +724,15 @@
         // Kompatibel dengan respons BinderByte DAN ShippingService lokal
         // ═══════════════════════════════════════════════════════
         function renderKurir(list, weight, dest, source) {
-            const box = $('box-results');
+            const info = $('ongkir-info');
+            const panel = $('ongkir-list-panel');
+            panel.innerHTML = '';
 
             const sourceLabel = source === 'binderbyte' ?
                 '<span class="text-green-600 font-bold">via BinderByte API</span>' :
                 '<span class="text-orange-500 font-bold">Estimasi lokal (API tidak tersedia)</span>';
 
-            box.innerHTML = `
-        <div class="flex items-center justify-between flex-wrap gap-2 bg-gray-50
-                    rounded-xl px-4 py-3 mb-3 text-xs text-gray-600">
+            info.innerHTML = `
             <span>
                 <i class="fa-solid fa-truck text-primary mr-1"></i>
                 <strong>${list.length} layanan</strong> ke <strong>${dest}</strong>
@@ -837,8 +742,7 @@
             <button type="button" onclick="cekOngkir()"
                 class="text-primary font-bold hover:underline flex items-center gap-1">
                 <i class="fa-solid fa-rotate-right text-xs"></i> Refresh
-            </button>
-        </div>`;
+            </button>`;
 
             list.forEach((item, i) => {
                 const cost = item.cost || 0;
@@ -852,20 +756,21 @@
                 const estimate = item.estimate || item.etd || '-';
 
                 const label = document.createElement('label');
-                label.className = 'kurir-card flex items-center gap-3 p-4 border-2 border-gray-100 ' +
-                    'rounded-2xl cursor-pointer hover:border-primary hover:bg-purple-50 ' +
-                    'transition-all duration-200 group mb-2 select-none';
+                label.className = 'kurir-card flex items-center gap-3 p-3 bg-white border-2 border-gray-100 ' +
+                    'rounded-xl cursor-pointer hover:border-primary hover:bg-purple-50 ' +
+                    'transition-all duration-200 group select-none';
 
                 label.dataset.cost = cost;
                 label.dataset.name = courierName;
                 label.dataset.service = service;
                 label.dataset.code = courierCode;
                 label.dataset.estimate = estimate;
+                label.dataset.icon = courierIcon;
 
                 label.innerHTML = `
             <input type="radio" class="sr-only" name="_kr" value="${i}" onchange="pilihKurir(this)">
-            <div class="w-12 h-12 bg-gray-50 border border-gray-200 rounded-xl flex items-center
-                        justify-center text-2xl flex-shrink-0 group-hover:border-purple-200 transition">
+            <div class="w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg flex items-center
+                        justify-center text-lg flex-shrink-0 group-hover:border-purple-200 transition">
                 ${courierIcon}
             </div>
             <div class="flex-1 min-w-0">
@@ -875,23 +780,42 @@
                         ${service}
                     </span>
                 </div>
-                <p class="text-xs text-gray-400 mb-1">${serviceName}</p>
-                <p class="text-xs text-blue-600 font-semibold flex items-center gap-1">
+                <p class="text-xs text-gray-400 mb-0.5 truncate">${serviceName}</p>
+                <p class="text-[11px] text-blue-600 font-semibold flex items-center gap-1">
                     <i class="fa-regular fa-clock"></i>
                     Estimasi ${estimate} hari kerja
                 </p>
             </div>
             <div class="text-right flex-shrink-0">
-                <p class="font-black text-primary text-base">Rp${F.format(cost)}</p>
-                <p class="text-[10px] text-gray-400 mt-1">Total: Rp${F.format(SUB + cost)}</p>
+                <p class="font-black text-primary text-sm">Rp${F.format(cost)}</p>
             </div>
             <div class="kurir-dot w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0
                         flex items-center justify-center transition-all"></div>`;
 
-                box.appendChild(label);
+                panel.appendChild(label);
             });
 
             show('box-results', true);
+            // Belum ada pilihan → buka dropdown otomatis agar user langsung memilih
+            openOngkirList();
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // DROPDOWN ONGKIR — buka / tutup daftar pilihan kurir
+        // ═══════════════════════════════════════════════════════
+        function openOngkirList() {
+            $('ongkir-list-panel').classList.remove('hidden');
+            $('ongkir-toggle-chevron').style.transform = 'rotate(180deg)';
+        }
+
+        function closeOngkirList() {
+            $('ongkir-list-panel').classList.add('hidden');
+            $('ongkir-toggle-chevron').style.transform = 'rotate(0deg)';
+        }
+
+        function toggleOngkirList() {
+            const panel = $('ongkir-list-panel');
+            panel.classList.contains('hidden') ? openOngkirList() : closeOngkirList();
         }
 
         // Emoji fallback saat courier_icon tidak ada (respons BinderByte)
@@ -937,10 +861,13 @@
 
             const cost = parseInt(card.dataset.cost) || 0;
             const est = card.dataset.estimate || '-';
+            const name = card.dataset.name;
+            const service = card.dataset.service;
+            const icon = card.dataset.icon;
 
             $('val-code').value = card.dataset.code;
-            $('val-name').value = card.dataset.name;
-            $('val-service').value = card.dataset.service;
+            $('val-name').value = name;
+            $('val-service').value = service;
             $('val-cost').value = cost;
             $('val-estimate').value = est;
 
@@ -949,6 +876,20 @@
             $('disp-estimate').textContent = `Est. ${est} hari`;
             $('row-estimate').classList.remove('hidden');
             $('row-estimate').style.display = 'flex';
+
+            // Perbarui tombol dropdown agar menampilkan 1 pilihan yang dipilih
+            $('ongkir-toggle-icon').innerHTML = icon;
+            $('ongkir-toggle-icon').classList.add('border-purple-200', 'bg-purple-50');
+            $('ongkir-toggle-title').innerHTML =
+                `<span class="text-gray-800">${name}</span>
+             <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-bold ml-1">${service}</span>`;
+            $('ongkir-toggle-title').classList.remove('text-gray-400');
+            $('ongkir-toggle-sub').textContent = `Estimasi ${est} hari kerja · Tap untuk ganti`;
+            $('ongkir-toggle-price').innerHTML =
+                `<p class="font-black text-primary text-sm">Rp${F.format(cost)}</p>`;
+
+            // Tutup dropdown setelah satu pilihan ditentukan
+            closeOngkirList();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -960,7 +901,9 @@
             show('box-loading', false);
             show('box-error', false);
             show('box-results', false);
-            $('box-results').innerHTML = '';
+            $('ongkir-info').innerHTML = '';
+            $('ongkir-list-panel').innerHTML = '';
+            closeOngkirList();
             resetKurir();
         }
 
@@ -973,88 +916,23 @@
             $('disp-shipping').textContent = '— Pilih kurir';
             $('disp-total').textContent = 'Rp' + F.format(SUB);
             $('row-estimate').classList.add('hidden');
+
+            // Kembalikan tombol dropdown ke kondisi belum memilih
+            const icon = $('ongkir-toggle-icon');
+            if (icon) {
+                icon.innerHTML = '<i class="fa-solid fa-truck-fast text-gray-300 text-base"></i>';
+                icon.classList.remove('border-purple-200', 'bg-purple-50');
+            }
+            const title = $('ongkir-toggle-title');
+            if (title) {
+                title.textContent = 'Pilih jasa pengiriman';
+                title.classList.add('text-gray-400');
+            }
+            const sub = $('ongkir-toggle-sub');
+            if (sub) sub.textContent = 'Tap untuk melihat pilihan yang tersedia';
+            const price = $('ongkir-toggle-price');
+            if (price) price.innerHTML = '';
         }
-
-        // ═══════════════════════════════════════════════════════
-        // CEK RESI
-        // ═══════════════════════════════════════════════════════
-        async function cekResi() {
-            const courier = $('trk-courier').value;
-            const awb = $('trk-awb').value.trim();
-
-            if (!awb) {
-                toast('Masukkan nomor resi terlebih dahulu!', 'error');
-                return;
-            }
-
-            $('trk-loading').classList.remove('hidden');
-            $('trk-result').classList.add('hidden');
-            $('trk-result').innerHTML = '';
-
-            try {
-                const d = await req('/api/tracking/track', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        courier,
-                        awb
-                    }),
-                });
-
-                $('trk-loading').classList.add('hidden');
-
-                if (!d.success) {
-                    $('trk-result').innerHTML =
-                        `<div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-                        <i class="fa-solid fa-circle-exclamation mr-2"></i>${d.message || 'Resi tidak ditemukan.'}
-                    </div>`;
-                    $('trk-result').classList.remove('hidden');
-                    return;
-                }
-
-                const td = d.data;
-                const history = (td.history || td.manifest || []);
-
-                let histHTML = history.length ?
-                    history.map(h => `
-                    <div class="flex gap-3 text-xs py-2 border-b border-gray-50 last:border-0">
-                        <div class="text-gray-400 flex-shrink-0 w-32">${h.date || h.tanggal || ''} ${h.time || h.jam || ''}</div>
-                        <div class="text-gray-700">${h.description || h.keterangan || h.desc || ''}</div>
-                    </div>`).join('') :
-                    '<p class="text-xs text-gray-400">Belum ada riwayat tracking.</p>';
-
-                $('trk-result').innerHTML = `
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <div class="flex items-center gap-3 mb-3">
-                        <i class="fa-solid fa-box text-green-600"></i>
-                        <div>
-                            <p class="text-xs font-bold text-gray-700">Resi: <span class="text-green-700">${awb}</span></p>
-                            <p class="text-xs text-gray-500">Status: <strong>${td.status || td.delivered || '-'}</strong></p>
-                        </div>
-                    </div>
-                    <div class="space-y-1 max-h-48 overflow-y-auto">${histHTML}</div>
-                </div>`;
-                $('trk-result').classList.remove('hidden');
-
-            } catch (e) {
-                $('trk-loading').classList.add('hidden');
-                $('trk-result').innerHTML =
-                    `<div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">
-                    <i class="fa-solid fa-circle-exclamation mr-2"></i>${e.message}
-                </div>`;
-                $('trk-result').classList.remove('hidden');
-            }
-        }
-
-        // Enter key untuk tracking
-        $('trk-awb').addEventListener('keydown', e => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                cekResi();
-            }
-        });
 
         // ═══════════════════════════════════════════════════════
         // VALIDASI FORM
@@ -1123,8 +1001,23 @@
         }
 
         // ═══════════════════════════════════════════════════════
+        // CATATAN — hitung karakter
+        // ═══════════════════════════════════════════════════════
+        function initNotesCounter() {
+            const field = $('notes-field');
+            const count = $('notes-count');
+            if (!field || !count) return;
+            const update = () => count.textContent = field.value.length;
+            field.addEventListener('input', update);
+            update();
+        }
+
+        // ═══════════════════════════════════════════════════════
         // INIT
         // ═══════════════════════════════════════════════════════
-        document.addEventListener('DOMContentLoaded', initProvinces);
+        document.addEventListener('DOMContentLoaded', () => {
+            initProvinces();
+            initNotesCounter();
+        });
     </script>
 @endpush
