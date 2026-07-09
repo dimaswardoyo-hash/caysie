@@ -7,24 +7,19 @@ use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Services\BinderByteService;
+use App\Services\RajaOngkirService;
 use App\Services\ShippingService;
 
 class OngkirController extends Controller
 {
-    // Origin: Gunungkidul → gunakan ID kota BinderByte
-    // ID ini didapat dari endpoint /wilayah/kabupaten provinsi DIY
-    // Ganti dengan ID yang benar dari hasil /api/wilayah/cities?province_id=<DIY_ID>
-    private const ORIGIN_CITY_ID = '3403'; // Kode kabupaten Gunungkidul (BPS/BinderByte)
-
-    public function __construct(private BinderByteService $bb) {}
+    public function __construct(private RajaOngkirService $rajaOngkir) {}
 
     public function check(Request $request): JsonResponse
     {
         $request->validate([
             'destination_province' => 'required|string|min:2',
             'destination_city' => 'required|string|min:2',
-            'destination_city_id' => 'required|string', // ID dari dropdown BinderByte
+            'destination_city_id' => 'required|string', // ID kota dari dropdown RajaOngkir
         ]);
 
         // ── Hitung berat dari keranjang ──────────────────────────
@@ -48,6 +43,7 @@ class OngkirController extends Controller
         $province = $request->destination_province;
         $city = $request->destination_city;
         $destId = $request->destination_city_id;
+        $originId = config('services.rajaongkir.origin_id');
 
         Log::info('[Ongkir] Check', [
             'province' => $province,
@@ -56,20 +52,24 @@ class OngkirController extends Controller
             'weight_g' => $totalWeightGram,
         ]);
 
-        // ── Panggil BinderByte ───────────────────────────────────
-        // BinderByte /v1/ongkir menerima weight dalam gram
-        $results = $this->bb->checkOngkir(origin: self::ORIGIN_CITY_ID, destination: $destId, weight: $totalWeightGram);
+        // ── Panggil RajaOngkir (kalau origin sudah dikonfigurasi) ─
+        $results = [];
+        if (!empty($originId)) {
+            $results = $this->rajaOngkir->checkOngkir(origin: (string) $originId, destination: $destId, weight: $totalWeightGram);
+        } else {
+            Log::warning('[Ongkir] RAJAONGKIR_ORIGIN_ID belum diisi di .env — pakai fallback lokal.');
+        }
 
-        // ── Fallback: jika BinderByte gagal, gunakan ShippingService lokal ──
+        // ── Fallback: jika RajaOngkir gagal/belum dikonfigurasi, pakai tarif lokal ──
         if (empty($results)) {
-            Log::warning('[Ongkir] BinderByte kosong, fallback ke ShippingService lokal');
+            Log::warning('[Ongkir] RajaOngkir kosong, fallback ke ShippingService lokal');
 
             /** @var \App\Services\ShippingService $local */
             $local = app(ShippingService::class);
             $results = $local->calculate($province, $totalWeightGram);
             $source = 'local';
         } else {
-            $source = 'binderbyte';
+            $source = 'rajaongkir';
         }
 
         return response()->json([

@@ -4,19 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\BinderByteService;
+use App\Services\RajaOngkirService;
 use Illuminate\Http\JsonResponse;
-use App\Services\BiteshipService;
 
 class WilayahController extends Controller
 {
-    public function __construct(private BinderByteService $bb) {}
+    public function __construct(private RajaOngkirService $rajaOngkir) {}
 
     public function provinces(): JsonResponse
     {
         return response()->json([
             'success' => true,
-            'data' => $this->bb->getProvinces(),
+            'data' => $this->rajaOngkir->getProvinces(),
         ]);
     }
 
@@ -25,7 +24,7 @@ class WilayahController extends Controller
         $request->validate(['province_id' => 'required|string']);
         return response()->json([
             'success' => true,
-            'data' => $this->bb->getCities($request->province_id),
+            'data' => $this->rajaOngkir->getCities($request->province_id),
         ]);
     }
 
@@ -34,7 +33,7 @@ class WilayahController extends Controller
         $request->validate(['city_id' => 'required|string']);
         return response()->json([
             'success' => true,
-            'data' => $this->bb->getDistricts($request->city_id),
+            'data' => $this->rajaOngkir->getDistricts($request->city_id),
         ]);
     }
 
@@ -43,7 +42,7 @@ class WilayahController extends Controller
         $request->validate(['district_id' => 'required|string']);
         return response()->json([
             'success' => true,
-            'data' => $this->bb->getVillages($request->district_id),
+            'data' => $this->rajaOngkir->getVillages($request->district_id),
         ]);
     }
 }
