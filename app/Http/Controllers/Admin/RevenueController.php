@@ -16,21 +16,21 @@ class RevenueController extends Controller
         $month = $request->month ?? null;
 
         // ── Ringkasan Utama ──────────────────────────────
-        $totalRevenue = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])->sum('total');
+        $totalRevenue = Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])->sum('total_amount');
 
-        $monthRevenue = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
+        $monthRevenue = Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
-            ->sum('total');
+            ->sum('total_amount');
 
         $totalOrders = Order::count();
-        $paidOrders = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])->count();
+        $paidOrders = Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])->count();
         $pendingOrders = Order::where('status', 'pending')->count();
 
         // ── Grafik Bulanan (tahun dipilih) ───────────────
-        $monthlyData = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
+        $monthlyData = Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])
             ->whereYear('created_at', $year)
-            ->selectRaw('MONTH(created_at) as month, SUM(total) as revenue, COUNT(*) as orders')
+            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as revenue, COUNT(*) as orders')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -50,7 +50,7 @@ class RevenueController extends Controller
 
         // ── Transaksi Terbaru ────────────────────────────
         $recentOrders = Order::with('user')
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
+            ->whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])
             ->latest('paid_at')
             ->take(8)
             ->get();

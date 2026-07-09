@@ -133,7 +133,16 @@
         </div>
     @endif
     {{-- Content --}}
-    @yield('content')
+    @hasSection('content')
+        @yield('content')
+    @else
+        @isset($header)
+            <header class="max-w-7xl mx-auto px-6 pt-8">
+                {{ $header }}
+            </header>
+        @endisset
+        {{ $slot ?? '' }}
+    @endif
 
     {{-- ===================== FOOTER ===================== --}}
     @include('components.footer')

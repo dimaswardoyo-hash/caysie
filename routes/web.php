@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\OngkirController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\XenditWebhookController;
+use App\Http\Controllers\ProfileController;
 
 // ── Halaman publik ───────────────────────────────────────
 Route::get('/', [UserDashboard::class, 'index'])->name('home');
@@ -23,6 +24,19 @@ require __DIR__ . '/auth.php';
 
 // ── XENDIT WEBHOOK (tanpa auth, tanpa CSRF — lihat VerifyCsrfToken.php) ──
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])->name('webhooks.xendit');
+
+// ── DASHBOARD & PROFIL (dipakai layouts/navigation.blade.php & resources/views/profile/*) ──
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})
+    ->middleware('auth')
+    ->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 // ── ADMIN ────────────────────────────────────────────────
 Route::prefix('admin')
@@ -65,6 +79,7 @@ Route::prefix('user')
         Route::get('/payment/{order}/success', [CheckoutController::class, 'paymentSuccess'])->name('payment.success');
         Route::get('/payment/{order}/failed', [CheckoutController::class, 'paymentFailed'])->name('payment.failed');
         Route::get('/payment/{order}/status', [CheckoutController::class, 'checkStatus'])->name('payment.status');
+        Route::post('/payment/{order}/retry', [CheckoutController::class, 'retryPayment'])->name('payment.retry');
 
         // Pesanan
         Route::get('/orders', [OrderController::class, 'index'])->name('orders');

@@ -87,6 +87,7 @@ class CheckoutController extends Controller
                 'subtotal' => $subtotal,
                 'total_amount' => $totalAmount,
                 'notes' => $validated['notes'] ?? null,
+                'payment_deadline' => now()->addHours(24),
             ]);
 
             // 2. Buat order items & kurangi stok
@@ -97,13 +98,12 @@ class CheckoutController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $cart->product_id,
-                    'product_size_id' => $cart->product_size_id,
                     'product_name' => $cart->product->name,
-                    'size' => $cart->productSize->size ?? '-',
+                    'product_size' => $cart->productSize->size ?? '-',
+                    'product_image' => $cart->product->image ?? null,
                     'price' => $price,
                     'quantity' => $cart->quantity,
                     'subtotal' => $price * $cart->quantity,
-                    'weight' => $cart->product->weight ?? 200,
                 ]);
 
                 $cart->productSize()->decrement('stock', $cart->quantity);
@@ -183,12 +183,71 @@ class CheckoutController extends Controller
             abort(403);
         }
 
-        // Coba buat ulang invoice jika belum ada atau kedaluwarsa
-        if (!$order->xendit_invoice_url) {
-            // (opsional) bisa trigger createInvoice lagi di sini
+        return view('user.payment', compact('order'));
+    }
+
+    // ── Buat ulang invoice Xendit (tombol "Buat Link Pembayaran") ─
+    public function retryPayment(Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
         }
 
-        return view('user.payment', compact('order'));
+        if ($order->status !== 'pending') {
+            return redirect()->route('user.payment.show', $order)->with('error', 'Pesanan ini tidak lagi menunggu pembayaran.');
+        }
+
+        $xenditItems = $order->items
+            ->map(
+                fn($item) => [
+                    'name' => $item->product_name . ' (' . $item->product_size . ')',
+                    'quantity' => $item->quantity,
+                    'price' => (int) $item->price,
+                    'category' => 'Fashion',
+                ],
+            )
+            ->toArray();
+
+        $xenditItems[] = [
+            'name' => 'Ongkos Kirim (' . $order->courier_name . ' ' . $order->courier_service . ')',
+            'quantity' => 1,
+            'price' => (int) $order->shipping_cost,
+            'category' => 'Shipping',
+        ];
+
+        try {
+            $invoice = $this->xendit->createInvoice([
+                'external_id' => $order->order_number,
+                'amount' => (int) $order->total_amount,
+                'payer_email' => auth()->user()->email,
+                'description' => 'Pembayaran ' . $order->order_number . ' — Caysie',
+                'customer_name' => $order->receiver_name,
+                'customer_phone' => $order->receiver_phone,
+                'success_redirect_url' => route('user.payment.success', $order),
+                'failure_redirect_url' => route('user.payment.failed', $order),
+                'items' => $xenditItems,
+            ]);
+
+            if (isset($invoice['error'])) {
+                throw new \RuntimeException($invoice['error']);
+            }
+
+            $order->update([
+                'xendit_invoice_id' => $invoice['id'],
+                'xendit_invoice_url' => $invoice['invoice_url'],
+                'xendit_expires_at' => $invoice['expiry_date'] ?? null,
+            ]);
+
+            Log::info('[Checkout] Invoice Xendit dibuat ulang (retry)', [
+                'order_id' => $order->id,
+                'invoice_url' => $invoice['invoice_url'],
+            ]);
+
+            return redirect($invoice['invoice_url']);
+        } catch (\Throwable $e) {
+            Log::error('[Checkout] Retry Xendit error: ' . $e->getMessage());
+            return redirect()->route('user.payment.show', $order)->with('error', 'Gagal membuat link pembayaran baru. Silakan coba lagi beberapa saat.');
+        }
     }
 
     // ── Callback: Xendit redirect setelah BERHASIL bayar ─────

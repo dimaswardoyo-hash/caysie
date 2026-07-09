@@ -8,7 +8,7 @@ use App\Models\Order;
 
 class OrderController extends Controller
 {
-    private array $statuses = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
+    private array $statuses = ['pending', 'waiting_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
     public function index(Request $request)
     {
@@ -19,7 +19,7 @@ class OrderController extends Controller
         }
         if ($request->search) {
             $query->where(function ($q) use ($request) {
-                $q->where('order_code', 'like', "%{$request->search}%")->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->search}%"));
+                $q->where('order_number', 'like', "%{$request->search}%")->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$request->search}%"));
             });
         }
         if ($request->date_from) {
@@ -55,16 +55,16 @@ class OrderController extends Controller
         $order->update(['status' => $request->status]);
 
         // Jika dikonfirmasi bayar
-        if ($request->status === 'paid' && !$order->paid_at) {
+        if ($request->status === 'confirmed' && !$order->paid_at) {
             $order->update(['paid_at' => now()]);
         }
 
-        return back()->with('success', "Status pesanan #{$order->order_code} berhasil diubah dari " . ucfirst($old) . ' → ' . ucfirst($request->status) . '.');
+        return back()->with('success', "Status pesanan #{$order->order_number} berhasil diubah dari " . ucfirst($old) . ' → ' . ucfirst($request->status) . '.');
     }
 
     public function confirmPayment(Order $order)
     {
-        if ($order->status !== 'paid' && $order->status !== 'pending') {
+        if ($order->status !== 'confirmed' && $order->status !== 'pending') {
             return back()->with('error', 'Pesanan tidak dalam status yang bisa dikonfirmasi.');
         }
 
@@ -73,6 +73,6 @@ class OrderController extends Controller
             'paid_at' => $order->paid_at ?? now(),
         ]);
 
-        return back()->with('success', "Pembayaran pesanan #{$order->order_code} berhasil dikonfirmasi. Status → Diproses.");
+        return back()->with('success', "Pembayaran pesanan #{$order->order_number} berhasil dikonfirmasi. Status → Diproses.");
     }
 }

@@ -220,7 +220,8 @@
                     }
 
                 } catch (e) {
-                    /* silent */ }
+                    /* silent */
+                }
             }, 5000);
         @endif
 
