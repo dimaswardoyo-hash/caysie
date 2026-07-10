@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'user' => \App\Http\Middleware\UserMiddleware::class,
             App\Providers\NavbarServiceProvider::class,
         ]);
+
+        // Xendit mengirim webhook tanpa CSRF token (server-to-server), jadi harus dikecualikan.
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/xendit',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
