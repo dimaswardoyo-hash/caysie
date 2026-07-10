@@ -47,32 +47,46 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $request->validate([
-            'status' => 'required|in:' . implode(',', $this->statuses),
-        ]);
+        $request->validate(
+            [
+                'status' => 'required|in:' . implode(',', $this->statuses),
+                'tracking_number' => 'required_if:status,shipped|nullable|string|max:100',
+            ],
+            [
+                'tracking_number.required_if' => 'Nomor resi wajib diisi saat status diubah ke Dikirim.',
+            ],
+        );
 
         $old = $order->status;
-        $order->update(['status' => $request->status]);
 
-        // Jika dikonfirmasi bayar
+        $data = ['status' => $request->status];
+
+        // Kalau baru dikonfirmasi pembayarannya lewat form manual ini
         if ($request->status === 'confirmed' && !$order->paid_at) {
-            $order->update(['paid_at' => now()]);
+            $data['paid_at'] = now();
         }
+
+        // Nomor resi wajib disertakan saat status diubah ke "Dikirim"
+        if ($request->status === 'shipped') {
+            $data['tracking_number'] = $request->tracking_number;
+        }
+
+        $order->update($data);
 
         return back()->with('success', "Status pesanan #{$order->order_number} berhasil diubah dari " . ucfirst($old) . ' → ' . ucfirst($request->status) . '.');
     }
 
     public function confirmPayment(Order $order)
     {
-        if ($order->status !== 'confirmed' && $order->status !== 'pending') {
+        if (!in_array($order->status, ['pending', 'waiting_confirmation'])) {
             return back()->with('error', 'Pesanan tidak dalam status yang bisa dikonfirmasi.');
         }
 
         $order->update([
-            'status' => 'processing',
+            'status' => 'confirmed',
             'paid_at' => $order->paid_at ?? now(),
         ]);
 
-        return back()->with('success', "Pembayaran pesanan #{$order->order_number} berhasil dikonfirmasi. Status → Diproses.");
+        return back()->with('success', "Pembayaran pesanan #{$order->order_number} berhasil dikonfirmasi. Status → Dikonfirmasi. Lanjutkan ke 'Diproses' saat pesanan mulai dikemas.");
     }
 }

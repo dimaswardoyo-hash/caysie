@@ -151,7 +151,7 @@
                 </div>
 
                 {{-- Upload Bukti Bayar — di halaman detail --}}
-                @if ($order->status === 'pending')
+                @if (in_array($order->status, ['pending', 'waiting_confirmation']))
                     <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-3xl p-6"
                         id="section-upload">
                         <h3 class="font-black text-amber-800 mb-2 flex items-center gap-2">
@@ -161,22 +161,24 @@
                             Selesaikan Pembayaran
                         </h3>
 
-                        {{-- Countdown --}}
-                        @if ($order->payment_deadline && !$order->isPaymentExpired())
-                            <div class="flex items-center gap-3 mb-4 flex-wrap">
-                                <p class="text-sm text-amber-700">Bayar sebelum:</p>
-                                <span
-                                    class="bg-white border border-amber-200 px-3 py-1 rounded-xl font-black text-amber-700 font-mono tracking-widest shadow-sm"
-                                    data-countdown="{{ $order->payment_seconds_left }}"
-                                    id="countdown-{{ $order->id }}">
-                                    {{ gmdate('H:i:s', $order->payment_seconds_left) }}
-                                </span>
-                                <span class="text-xs text-amber-600">{{ $order->payment_deadline_label }}</span>
-                            </div>
-                        @elseif($order->isPaymentExpired())
-                            <div class="bg-red-50 rounded-xl p-3 mb-4 text-xs text-red-700 font-bold">
-                                ⏰ Waktu pembayaran sudah habis.
-                            </div>
+                        {{-- Countdown (disembunyikan setelah bukti dikirim, karena sudah tidak relevan) --}}
+                        @if (!$order->payment_proof)
+                            @if ($order->payment_deadline && !$order->isPaymentExpired())
+                                <div class="flex items-center gap-3 mb-4 flex-wrap">
+                                    <p class="text-sm text-amber-700">Bayar sebelum:</p>
+                                    <span
+                                        class="bg-white border border-amber-200 px-3 py-1 rounded-xl font-black text-amber-700 font-mono tracking-widest shadow-sm"
+                                        data-countdown="{{ $order->payment_seconds_left }}"
+                                        id="countdown-{{ $order->id }}">
+                                        {{ gmdate('H:i:s', $order->payment_seconds_left) }}
+                                    </span>
+                                    <span class="text-xs text-amber-600">{{ $order->payment_deadline_label }}</span>
+                                </div>
+                            @elseif($order->isPaymentExpired())
+                                <div class="bg-red-50 rounded-xl p-3 mb-4 text-xs text-red-700 font-bold">
+                                    ⏰ Waktu pembayaran sudah habis.
+                                </div>
+                            @endif
                         @endif
 
                         <div class="bg-white rounded-2xl p-4 text-sm mb-4 shadow-sm">

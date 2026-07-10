@@ -136,7 +136,7 @@
                                             title="Detail">
                                             <i class="fa-solid fa-eye text-xs"></i>
                                         </a>
-                                        @if ($order->status === 'pending' && $order->payment_proof)
+                                        @if (in_array($order->status, ['pending', 'waiting_confirmation']) && $order->payment_proof)
                                             <form action="{{ route('admin.orders.confirm', $order) }}" method="POST">
                                                 @csrf @method('PATCH')
                                                 <button type="submit"

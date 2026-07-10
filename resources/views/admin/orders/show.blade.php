@@ -155,7 +155,7 @@
                                 <p class="font-bold text-gray-800 text-sm">
                                     {{ $order->paid_at->isoFormat('D MMM Y, HH:mm') }} WIB</p>
                             @endif
-                            @if ($order->status === 'pending' || $order->status === 'confirmed')
+                            @if (in_array($order->status, ['pending', 'waiting_confirmation']))
                                 <form action="{{ route('admin.orders.confirm', $order) }}" method="POST" class="mt-4">
                                     @csrf @method('PATCH')
                                     <button type="submit"
@@ -193,7 +193,7 @@
                                       ? 'border-' . $sc . '-400 bg-' . $sc . '-50'
                                       : 'border-gray-100 hover:border-gray-200' }}">
                                 <input type="radio" name="status" value="{{ $status }}" class="sr-only"
-                                    {{ $order->status === $status ? 'checked' : '' }}>
+                                    onchange="toggleTrackingField(this)" {{ $order->status === $status ? 'checked' : '' }}>
                                 <span class="w-3 h-3 rounded-full bg-{{ $sc }}-400 flex-shrink-0"></span>
                                 <span
                                     class="text-sm font-semibold {{ $order->status === $status ? 'text-' . $sc . '-800' : 'text-gray-600' }}">
@@ -205,12 +205,41 @@
                             </label>
                         @endforeach
                     </div>
+
+                    {{-- No. Resi — wajib diisi saat status "Dikirim" --}}
+                    <div id="tracking-field" class="mb-4 {{ $order->status === 'shipped' ? '' : 'hidden' }}">
+                        <label class="block text-xs font-bold text-gray-500 mb-1.5">
+                            Nomor Resi <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="tracking_number"
+                            value="{{ old('tracking_number', $order->tracking_number) }}"
+                            placeholder="Contoh: JX1234567890"
+                            class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-mono focus:outline-none focus:border-primary transition">
+                        <p class="text-[11px] text-gray-400 mt-1">
+                            Kurir: {{ $order->courier_name }} {{ $order->courier_service }}
+                        </p>
+                        @error('tracking_number')
+                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <button type="submit"
                         class="w-full bg-primary text-white font-bold py-3 rounded-xl hover:bg-primary-dark transition text-sm shadow-lg shadow-purple-200">
                         <i class="fa-solid fa-save mr-1"></i> Simpan Status
                     </button>
                 </form>
             </div>
+
+            <script>
+                function toggleTrackingField(radio) {
+                    const field = document.getElementById('tracking-field');
+                    if (radio.value === 'shipped') {
+                        field.classList.remove('hidden');
+                    } else {
+                        field.classList.add('hidden');
+                    }
+                }
+            </script>
 
             {{-- Info Pelanggan --}}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">

@@ -283,6 +283,7 @@ class CheckoutController extends Controller
 
         $order->update([
             'payment_proof' => $path,
+            'status' => 'waiting_confirmation',
         ]);
 
         Log::info('[Checkout] Bukti pembayaran diupload', [
