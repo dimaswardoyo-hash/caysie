@@ -71,6 +71,13 @@ class OrderController extends Controller
             $data['tracking_number'] = $request->tracking_number;
         }
 
+        // Kembalikan stok jika admin membatalkan order yang sebelumnya belum dibatalkan
+        if ($request->status === 'cancelled' && $old !== 'cancelled') {
+            $order->restoreStock();
+            $data['cancelled_at'] = now();
+            $data['cancelled_by'] = 'admin';
+        }
+
         $order->update($data);
 
         return back()->with('success', "Status pesanan #{$order->order_number} berhasil diubah dari " . ucfirst($old) . ' → ' . ucfirst($request->status) . '.');

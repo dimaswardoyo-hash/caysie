@@ -178,4 +178,23 @@ class Order extends Model
     {
         return $query->where('user_id', $userId);
     }
+
+    // ── Kembalikan stok semua item pesanan ini ────────────────
+    // Dipakai oleh SEMUA jalur pembatalan (user cancel, auto-expire,
+    // webhook Xendit expired, admin ubah status ke cancelled) agar
+    // stok selalu konsisten dikembalikan, di mana pun pembatalan terjadi.
+    public function restoreStock(): void
+    {
+        foreach ($this->items as $item) {
+            $product = \App\Models\Product::find($item->product_id);
+            if (!$product) {
+                continue;
+            }
+
+            $size = $product->sizes()->where('size', $item->product_size)->lockForUpdate()->first();
+            if ($size) {
+                $size->increment('stock', $item->quantity);
+            }
+        }
+    }
 }

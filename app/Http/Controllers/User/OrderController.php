@@ -72,15 +72,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             // Kembalikan stok produk
-            foreach ($order->items as $item) {
-                $product = \App\Models\Product::find($item->product_id);
-                if ($product) {
-                    $size = $product->sizes()->where('size', $item->product_size)->first();
-                    if ($size) {
-                        $size->increment('stock', $item->quantity);
-                    }
-                }
-            }
+            $order->restoreStock();
 
             $order->update([
                 'status' => 'cancelled',
@@ -165,15 +157,7 @@ class OrderController extends Controller
             DB::beginTransaction();
             try {
                 // Kembalikan stok
-                foreach ($order->items as $item) {
-                    $product = \App\Models\Product::find($item->product_id);
-                    if ($product) {
-                        $size = $product->sizes()->where('size', $item->product_size)->first();
-                        if ($size) {
-                            $size->increment('stock', $item->quantity);
-                        }
-                    }
-                }
+                $order->restoreStock();
                 $order->update([
                     'status' => 'cancelled',
                     'cancelled_at' => now(),

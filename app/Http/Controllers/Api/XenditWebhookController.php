@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class XenditWebhookController extends Controller
 {
-    public function __construct(private XenditService $xendit) {}
+    public function __construct(private XenditService $xendit)
+    {
+    }
 
     /**
      * Xendit mengirim POST ke endpoint ini setiap ada perubahan status pembayaran.
@@ -82,7 +84,13 @@ class XenditWebhookController extends Controller
     private function markExpired(Order $order): void
     {
         if ($order->status === 'pending') {
-            $order->update(['status' => 'cancelled']);
+            $order->restoreStock();
+            $order->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancel_reason' => 'Invoice Xendit kedaluwarsa.',
+                'cancelled_by' => 'system',
+            ]);
 
             Log::info('[Xendit Webhook] Order EXPIRED/dibatalkan', [
                 'order_id' => $order->id,

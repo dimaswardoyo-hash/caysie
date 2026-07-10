@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Storage;
 
 class CheckoutController extends Controller
 {
-    public function __construct(private XenditService $xendit) {}
+    public function __construct(private XenditService $xendit)
+    {
+    }
 
     // ── Halaman checkout ─────────────────────────────────────
     public function index()
@@ -106,7 +108,13 @@ class CheckoutController extends Controller
                     'subtotal' => $price * $cart->quantity,
                 ]);
 
-                $cart->productSize()->decrement('stock', $cart->quantity);
+                // Kunci baris stok & cek ulang ketersediaan saat ini (mencegah oversell
+                // jika beberapa user checkout bersamaan untuk stok yang sama/terbatas).
+                $size = $cart->productSize()->lockForUpdate()->first();
+                if (!$size || $size->stock < $cart->quantity) {
+                    throw new \RuntimeException('Stok ' . $cart->product->name . ' (' . ($cart->productSize->size ?? '-') . ') tidak lagi mencukupi.');
+                }
+                $size->decrement('stock', $cart->quantity);
 
                 $xenditItems[] = [
                     'name' => $cart->product->name . ' (' . ($cart->productSize->size ?? '-') . ')',
