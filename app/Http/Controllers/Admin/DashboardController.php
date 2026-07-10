@@ -15,8 +15,13 @@ class DashboardController extends Controller
         $stats = [
             'total_users' => User::where('role', 'user')->count(),
             'total_products' => Product::count(),
+            'active_products' => Product::where('is_active', true)->count(),
             'total_orders' => Order::count(),
             'total_revenue' => Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])->sum('total_amount'),
+            'revenue_this_month' => Order::whereIn('status', ['confirmed', 'processing', 'shipped', 'delivered'])
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'paid_orders' => Order::where('status', 'confirmed')->count(),
         ];
