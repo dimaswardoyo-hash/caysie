@@ -49,7 +49,7 @@ return [
         'base_url' => env('RAJAONGKIR_BASE_URL', 'https://rajaongkir.komerce.id/api/v1'),
         'origin_id' => env('RAJAONGKIR_ORIGIN_ID'),
     ],
-    
+
     'xendit' => [
         'secret_key' => env('XENDIT_SECRET_KEY'),
         'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
@@ -58,9 +58,10 @@ return [
     'biteship' => [
         'api_key' => env('BITESHIP_API_KEY'),
         'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
-        // Data toko sebagai pengirim — dipakai saat generate resi (createOrder)
+        // Data toko sebagai pengirim — dipakai saat cek ongkir & generate resi
         'origin_name' => env('BITESHIP_ORIGIN_NAME', 'Caysie Store'),
         'origin_phone' => env('BITESHIP_ORIGIN_PHONE'),
         'origin_address' => env('BITESHIP_ORIGIN_ADDRESS'),
+        'origin_postal_code' => env('BITESHIP_ORIGIN_POSTAL_CODE', '55813'),
     ],
 ];

@@ -9,12 +9,13 @@ class BiteshipService
 {
     private string $apiKey;
     private string $baseUrl;
-    private string $originPostalCode = '55813'; // Wonosari, Gunungkidul
+    private string $originPostalCode;
 
     public function __construct()
     {
         $this->apiKey = config('services.biteship.api_key');
         $this->baseUrl = config('services.biteship.base_url', 'https://api.biteship.com');
+        $this->originPostalCode = config('services.biteship.origin_postal_code', '55813'); // fallback: Wonosari, Gunungkidul
     }
 
     // ── Search lokasi ────────────────────────────────────
