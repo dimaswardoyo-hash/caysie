@@ -69,6 +69,76 @@ class BiteshipService
         }
     }
 
+    // ── Cari area_id tujuan dari data alamat yang SUDAH tersimpan ──
+    // (kota/kecamatan dari dropdown RajaOngkir + kode pos yang sudah otomatis
+    // tersimpan). Admin TIDAK perlu ketik ulang alamat di sini — hanya dipakai
+    // di sisi admin untuk generate resi, tidak pernah ditampilkan ke customer.
+    // Coba dari yang paling spesifik (kode pos) ke yang paling umum (nama kota),
+    // supaya makin besar kemungkinan ketemu meski nama daerahnya kurang populer.
+    public function resolveAreaId(string $city, string $district = '', string $postalCode = ''): array
+    {
+        $attempts = array_unique(array_filter([$postalCode, trim($district . ' ' . $city), $city]));
+
+        foreach ($attempts as $keyword) {
+            $areas = $this->searchLocation((string) $keyword);
+            if (!empty($areas)) {
+                return $areas; // Bisa >1 hasil — biarkan admin yang pilih yang paling cocok
+            }
+        }
+
+        return [];
+    }
+
+    // ── Buat order pengiriman (generate AWB / nomor resi) ─
+    public function createOrder(array $payload): array
+    {
+        if (empty($this->apiKey)) {
+            Log::error('[Biteship] API Key kosong! Cek .env BITESHIP_API_KEY');
+            return ['success' => false, 'error' => 'API key Biteship belum diset di .env'];
+        }
+
+        try {
+            $res = $this->post('/v1/orders', $payload);
+            $json = $res->json();
+
+            Log::info('[Biteship] createOrder', [
+                'status' => $res->status(),
+                'success' => $json['success'] ?? null,
+                'body' => substr($res->body(), 0, 500),
+            ]);
+
+            if ($res->status() === 401) {
+                return ['success' => false, 'error' => 'API key tidak valid (401 Unauthorized)'];
+            }
+
+            if (!($json['success'] ?? false)) {
+                return ['success' => false, 'error' => $json['error'] ?? 'Gagal membuat order di Biteship'];
+            }
+
+            return [
+                'success' => true,
+                'biteship_order_id' => $json['id'] ?? null,
+                'waybill_id' => $json['courier']['waybill_id'] ?? null,
+                'tracking_id' => $json['courier']['tracking_id'] ?? null,
+                'status' => $json['status'] ?? ($json['courier']['status'] ?? null),
+                'raw' => $json,
+            ];
+        } catch (\Exception $e) {
+            Log::error('[Biteship] createOrder exception: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    // ── Info kontak asal (toko) — dipakai saat createOrder ─
+    public function getOriginContact(): array
+    {
+        return [
+            'name' => config('services.biteship.origin_name', 'Caysie Store'),
+            'phone' => config('services.biteship.origin_phone', ''),
+            'address' => config('services.biteship.origin_address', ''),
+        ];
+    }
+
     // ── Cek ongkir ───────────────────────────────────────
     public function getRates(string $destinationAreaId, int $weightGram, string $couriers = 'anteraja,jne,jnt,sicepat,pos,tiki,ninja,lion,sap,id_express'): array
     {

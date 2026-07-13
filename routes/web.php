@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\RevenueController as AdminRevenue;
 use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\OngkirController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\TrackingController;
 use App\Http\Controllers\Api\XenditWebhookController;
 use App\Http\Controllers\ProfileController;
@@ -51,6 +52,9 @@ Route::prefix('admin')
         Route::get('orders/{order}', [AdminOrder::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [AdminOrder::class, 'updateStatus'])->name('orders.status');
         Route::patch('orders/{order}/confirm-payment', [AdminOrder::class, 'confirmPayment'])->name('orders.confirm');
+        Route::post('orders/{order}/shipping/resolve-area', [AdminOrder::class, 'resolveShippingArea'])->name('orders.shipping.resolve-area');
+        Route::post('orders/{order}/shipping/rates', [AdminOrder::class, 'shippingRates'])->name('orders.shipping.rates');
+        Route::post('orders/{order}/shipping/generate', [AdminOrder::class, 'generateShipment'])->name('orders.shipping.generate');
         Route::get('revenue', [AdminRevenue::class, 'index'])->name('revenue.index');
         Route::get('users', [AdminUser::class, 'index'])->name('users.index');
         Route::get('users/{user}', [AdminUser::class, 'show'])->name('users.show');
@@ -99,6 +103,7 @@ Route::prefix('api')
         Route::get('wilayah/districts', [WilayahController::class, 'districts'])->name('wilayah.districts');
         Route::get('wilayah/villages', [WilayahController::class, 'villages'])->name('wilayah.villages');
         Route::post('ongkir/check', [OngkirController::class, 'check'])->name('ongkir.check');
+        Route::get('location/search', [LocationController::class, 'search'])->name('location.search');
         Route::post('tracking/track', [TrackingController::class, 'track'])->name('tracking.track');
         Route::get('tracking/order/{order}', [TrackingController::class, 'trackOrder'])->name('tracking.order');
     });

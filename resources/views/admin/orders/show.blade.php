@@ -174,6 +174,25 @@
         {{-- KANAN: Update Status + Info --}}
         <div class="space-y-5">
 
+            {{-- Generate Resi Otomatis (Biteship) --}}
+            @if (!$order->tracking_number && in_array($order->status, ['confirmed', 'processing']))
+                <div class="bg-white rounded-2xl p-6 border border-gray-100">
+                    <h3 class="font-black text-gray-800 mb-1 flex items-center gap-2">
+                        <span
+                            class="w-7 h-7 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </span>
+                        Buat Resi Otomatis
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4">Generate AWB via Biteship — nomor resi terisi otomatis,
+                        tanpa ketik manual.</p>
+                    <button type="button" onclick="openShipmentModal()"
+                        class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition text-sm shadow-lg shadow-orange-200">
+                        <i class="fa-solid fa-bolt mr-1"></i> Buat Pengiriman
+                    </button>
+                </div>
+            @endif
+
             {{-- Update Status --}}
             <div class="bg-white rounded-2xl p-6 border border-gray-100">
                 <h3 class="font-black text-gray-800 mb-4 flex items-center gap-2">
@@ -291,5 +310,209 @@
             </div>
         </div>
     </div>
+
+    {{-- ── Modal Generate Resi Otomatis (Biteship) ─────────────────── --}}
+    @if (!$order->tracking_number && in_array($order->status, ['confirmed', 'processing']))
+        <div id="shipment-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-black text-gray-800">Buat Pengiriman Otomatis</h3>
+                    <button type="button" onclick="closeShipmentModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="shipment-step-area">
+                    <p class="text-sm text-gray-500 mb-3">Mencari area tujuan berdasarkan alamat pesanan ini
+                        (<strong>{{ $order->receiver_city }}, {{ $order->receiver_district }}</strong>)…</p>
+                    <div id="area-loading" class="text-center text-gray-400 text-sm py-6">
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> Mencari area di Biteship…
+                    </div>
+                    <div id="area-list" class="space-y-2"></div>
+                    <p id="area-error" class="hidden text-sm text-red-500 mt-2"></p>
+                </div>
+
+                <div id="shipment-step-rates" class="hidden">
+                    <p class="text-sm text-gray-500 mb-3">Pilih kurir untuk area terpilih:</p>
+                    <div id="rates-loading" class="hidden text-center text-gray-400 text-sm py-6">
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> Mengambil daftar kurir…
+                    </div>
+                    <div id="rates-list" class="space-y-2"></div>
+                    <p id="rates-error" class="hidden text-sm text-red-500 mt-2"></p>
+                    <button type="button" onclick="backToAreaStep()"
+                        class="text-xs text-gray-400 hover:text-primary mt-3">
+                        ← Ganti area tujuan
+                    </button>
+                </div>
+
+                <form id="generate-shipment-form" action="{{ route('admin.orders.shipping.generate', $order) }}"
+                    method="POST" class="hidden mt-4">
+                    @csrf
+                    <input type="hidden" name="area_id" id="input-area-id">
+                    <input type="hidden" name="courier_code" id="input-courier-code">
+                    <input type="hidden" name="courier_service" id="input-courier-service">
+                    <div id="confirm-summary" class="bg-gray-50 rounded-xl p-4 text-sm mb-4"></div>
+                    <button type="submit"
+                        class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition text-sm">
+                        <i class="fa-solid fa-check mr-1"></i> Konfirmasi & Buat Resi
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+            const RESOLVE_AREA_URL = @json(route('admin.orders.shipping.resolve-area', $order));
+            const RATES_URL = @json(route('admin.orders.shipping.rates', $order));
+            const KNOWN_AREA_ID = @json($order->biteship_area_id);
+            const KNOWN_AREA_NAME = @json(trim(($order->receiver_district ? $order->receiver_district . ', ' : '') . $order->receiver_city));
+
+            function openShipmentModal() {
+                document.getElementById('shipment-modal').classList.remove('hidden');
+                document.getElementById('generate-shipment-form').classList.add('hidden');
+
+                // Order dari checkout baru sudah tahu area_id-nya sendiri (dipilih customer
+                // langsung dari search Biteship) — jadi langsung lompat ke pilih kurir,
+                // tidak perlu tebak-tebak area lagi seperti order lama.
+                if (KNOWN_AREA_ID) {
+                    document.getElementById('shipment-step-area').classList.add('hidden');
+                    document.getElementById('shipment-step-rates').classList.remove('hidden');
+                    selectArea(KNOWN_AREA_ID, KNOWN_AREA_NAME);
+                } else {
+                    document.getElementById('shipment-step-area').classList.remove('hidden');
+                    document.getElementById('shipment-step-rates').classList.add('hidden');
+                    fetchAreas();
+                }
+            }
+
+            function closeShipmentModal() {
+                document.getElementById('shipment-modal').classList.add('hidden');
+            }
+
+            function backToAreaStep() {
+                document.getElementById('shipment-step-rates').classList.add('hidden');
+                document.getElementById('generate-shipment-form').classList.add('hidden');
+                document.getElementById('shipment-step-area').classList.remove('hidden');
+                fetchAreas();
+            }
+
+            async function fetchAreas() {
+                const loading = document.getElementById('area-loading');
+                const list = document.getElementById('area-list');
+                const errorEl = document.getElementById('area-error');
+                loading.classList.remove('hidden');
+                list.innerHTML = '';
+                errorEl.classList.add('hidden');
+
+                try {
+                    const res = await fetch(RESOLVE_AREA_URL, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF,
+                            'Accept': 'application/json'
+                        },
+                    });
+                    const data = await res.json();
+                    loading.classList.add('hidden');
+
+                    if (!data.success || !data.areas || data.areas.length === 0) {
+                        errorEl.textContent = data.message || 'Area tidak ditemukan.';
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+
+                    // Kalau cuma 1 hasil yang cocok, langsung lanjut ke pilih kurir
+                    if (data.areas.length === 1) {
+                        selectArea(data.areas[0].id, data.areas[0].name);
+                        return;
+                    }
+
+                    data.areas.forEach(area => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className =
+                            'w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-primary text-sm transition';
+                        btn.innerHTML = `<span class="font-semibold text-gray-800">${area.name}</span>`;
+                        btn.onclick = () => selectArea(area.id, area.name);
+                        list.appendChild(btn);
+                    });
+                } catch (e) {
+                    loading.classList.add('hidden');
+                    errorEl.textContent = 'Gagal menghubungi server: ' + e.message;
+                    errorEl.classList.remove('hidden');
+                }
+            }
+
+            let selectedAreaName = '';
+
+            async function selectArea(areaId, areaName) {
+                selectedAreaName = areaName;
+                document.getElementById('shipment-step-area').classList.add('hidden');
+                document.getElementById('shipment-step-rates').classList.remove('hidden');
+
+                const loading = document.getElementById('rates-loading');
+                const list = document.getElementById('rates-list');
+                const errorEl = document.getElementById('rates-error');
+                loading.classList.remove('hidden');
+                list.innerHTML = '';
+                errorEl.classList.add('hidden');
+
+                try {
+                    const res = await fetch(RATES_URL, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            area_id: areaId
+                        }),
+                    });
+                    const data = await res.json();
+                    loading.classList.add('hidden');
+
+                    if (!data.success || !data.rates || data.rates.length === 0) {
+                        errorEl.textContent = data.message || 'Tidak ada kurir tersedia untuk area ini.';
+                        errorEl.classList.remove('hidden');
+                        return;
+                    }
+
+                    data.rates.forEach(rate => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className =
+                            'w-full flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:border-primary text-sm transition text-left';
+                        btn.innerHTML = `
+                            <span>
+                                <span class="font-bold text-gray-800">${rate.courier_name} — ${rate.service}</span><br>
+                                <span class="text-xs text-gray-400">Estimasi ${rate.estimate} hari</span>
+                            </span>
+                            <span class="font-black text-primary">Rp${Number(rate.cost).toLocaleString('id-ID')}</span>
+                        `;
+                        btn.onclick = () => confirmShipment(areaId, rate);
+                        list.appendChild(btn);
+                    });
+                } catch (e) {
+                    loading.classList.add('hidden');
+                    errorEl.textContent = 'Gagal menghubungi server: ' + e.message;
+                    errorEl.classList.remove('hidden');
+                }
+            }
+
+            function confirmShipment(areaId, rate) {
+                document.getElementById('shipment-step-rates').classList.add('hidden');
+                document.getElementById('input-area-id').value = areaId;
+                document.getElementById('input-courier-code').value = rate.courier_code;
+                document.getElementById('input-courier-service').value = rate.service;
+                document.getElementById('confirm-summary').innerHTML = `
+                    <p><span class="text-gray-400">Tujuan:</span> <strong>${selectedAreaName}</strong></p>
+                    <p><span class="text-gray-400">Kurir:</span> <strong>${rate.courier_name} — ${rate.service}</strong></p>
+                    <p><span class="text-gray-400">Ongkir:</span> <strong>Rp${Number(rate.cost).toLocaleString('id-ID')}</strong></p>
+                `;
+                document.getElementById('generate-shipment-form').classList.remove('hidden');
+            }
+        </script>
+    @endif
 
 @endsection

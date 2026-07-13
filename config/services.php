@@ -58,5 +58,9 @@ return [
     'biteship' => [
         'api_key' => env('BITESHIP_API_KEY'),
         'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
+        // Data toko sebagai pengirim — dipakai saat generate resi (createOrder)
+        'origin_name' => env('BITESHIP_ORIGIN_NAME', 'Caysie Store'),
+        'origin_phone' => env('BITESHIP_ORIGIN_PHONE'),
+        'origin_address' => env('BITESHIP_ORIGIN_ADDRESS'),
     ],
 ];

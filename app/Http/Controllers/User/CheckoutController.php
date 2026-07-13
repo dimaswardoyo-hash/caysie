@@ -14,9 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CheckoutController extends Controller
 {
-    public function __construct(private XenditService $xendit)
-    {
-    }
+    public function __construct(private XenditService $xendit) {}
 
     // ── Halaman checkout ─────────────────────────────────────
     public function index()
@@ -43,9 +41,10 @@ class CheckoutController extends Controller
             'receiver_province' => 'required|string',
             'receiver_city' => 'required|string',
             'receiver_address' => 'required|string|max:1000',
-            'receiver_postal_code' => 'nullable|string|max:10',
+            'receiver_postal_code' => 'required|string|max:10',
             'receiver_district' => 'nullable|string',
             'receiver_village' => 'nullable|string',
+            'biteship_area_id' => 'required|string',
             'courier_code' => 'required|string',
             'courier_name' => 'required|string',
             'courier_service' => 'required|string',
@@ -81,6 +80,7 @@ class CheckoutController extends Controller
                 'receiver_district' => $validated['receiver_district'] ?? null,
                 'receiver_village' => $validated['receiver_village'] ?? null,
                 'receiver_postal_code' => $validated['receiver_postal_code'] ?? null,
+                'biteship_area_id' => $validated['biteship_area_id'],
                 'courier_code' => $validated['courier_code'],
                 'courier_name' => $validated['courier_name'],
                 'courier_service' => $validated['courier_service'],

@@ -32,6 +32,13 @@ class Order extends Model
         'shipping_estimate',
         'tracking_number',
 
+        // Biteship (generate resi otomatis)
+        'biteship_order_id',
+        'biteship_area_id',
+        'biteship_courier_company',
+        'biteship_courier_type',
+        'biteship_status',
+
         // Keuangan
         'subtotal',
         'total_amount',
@@ -177,6 +184,15 @@ class Order extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
+    }
+
+    // ── Total berat pesanan dalam gram (dipakai untuk cek ongkir & generate resi) ──
+    // Minimal 1000g (1kg) — sama seperti aturan yang sudah dipakai di Api\OngkirController.
+    public function totalWeightGram(): int
+    {
+        $this->loadMissing('items.product');
+
+        return (int) max(1000, collect($this->items)->sum(fn($item) => ($item->product->weight ?? 200) * $item->quantity));
     }
 
     // ── Kembalikan stok semua item pesanan ini ────────────────

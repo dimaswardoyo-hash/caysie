@@ -7,19 +7,18 @@ use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use App\Services\RajaOngkirService;
+use App\Services\BiteshipService;
 use App\Services\ShippingService;
 
 class OngkirController extends Controller
 {
-    public function __construct(private RajaOngkirService $rajaOngkir) {}
+    public function __construct(private BiteshipService $biteship) {}
 
     public function check(Request $request): JsonResponse
     {
         $request->validate([
-            'destination_province' => 'required|string|min:2',
-            'destination_city' => 'required|string|min:2',
-            'destination_city_id' => 'required|string', // ID kota dari dropdown RajaOngkir
+            'destination_area_id' => 'required|string',
+            'destination_name' => 'nullable|string',
         ]);
 
         // ── Hitung berat dari keranjang ──────────────────────────
@@ -40,43 +39,49 @@ class OngkirController extends Controller
         // Berat dalam gram, minimal 1000g (1kg)
         $totalWeightGram = (int) max(1000, $carts->sum(fn($c) => ($c->product->weight ?? 200) * $c->quantity));
 
-        $province = $request->destination_province;
-        $city = $request->destination_city;
-        $destId = $request->destination_city_id;
-        $originId = config('services.rajaongkir.origin_id');
+        $areaId = $request->destination_area_id;
+        $destinationName = $request->destination_name ?? $areaId;
 
-        Log::info('[Ongkir] Check', [
-            'province' => $province,
-            'city' => $city,
-            'dest_id' => $destId,
+        Log::info('[Ongkir] Check (Biteship)', [
+            'area_id' => $areaId,
+            'destination' => $destinationName,
             'weight_g' => $totalWeightGram,
         ]);
 
-        // ── Panggil RajaOngkir (kalau origin sudah dikonfigurasi) ─
+        // ── area_id sudah dipilih langsung oleh customer dari hasil pencarian ──
+        // Biteship, jadi tidak perlu lagi proses "tebak" area seperti sebelumnya.
         $results = [];
-        if (!empty($originId)) {
-            $results = $this->rajaOngkir->checkOngkir(origin: (string) $originId, destination: $destId, weight: $totalWeightGram);
-        } else {
-            Log::warning('[Ongkir] RAJAONGKIR_ORIGIN_ID belum diisi di .env — pakai fallback lokal.');
+
+        try {
+            $results = $this->biteship->getRates($areaId, $totalWeightGram);
+            foreach ($results as &$item) {
+                $item['source'] = 'biteship';
+            }
+            unset($item);
+        } catch (\Exception $e) {
+            Log::error('[Ongkir] Biteship exception: ' . $e->getMessage());
         }
 
-        // ── Fallback: jika RajaOngkir gagal/belum dikonfigurasi, pakai tarif lokal ──
+        // ── Fallback: kalau Biteship gagal total, pakai tarif lokal supaya checkout tidak buntu ──
         if (empty($results)) {
-            Log::warning('[Ongkir] RajaOngkir kosong, fallback ke ShippingService lokal');
+            Log::warning('[Ongkir] Biteship kosong untuk area ' . $areaId . ', fallback ke ShippingService lokal');
 
             /** @var \App\Services\ShippingService $local */
             $local = app(ShippingService::class);
-            $results = $local->calculate($province, $totalWeightGram);
-            $source = 'local';
-        } else {
-            $source = 'rajaongkir';
+            $results = $local->calculate($destinationName, $totalWeightGram);
+            foreach ($results as &$item) {
+                $item['source'] = 'local';
+            }
+            unset($item);
         }
+
+        usort($results, fn($a, $b) => $a['cost'] - $b['cost']);
 
         return response()->json([
             'success' => true,
-            'source' => $source,
+            'sources_used' => array_values(array_unique(array_column($results, 'source'))),
             'origin' => 'Gunungkidul, DI Yogyakarta',
-            'destination' => $city . ', ' . $province,
+            'destination' => $destinationName,
             'total_weight' => $totalWeightGram,
             'total_found' => count($results),
             'data' => $results,
