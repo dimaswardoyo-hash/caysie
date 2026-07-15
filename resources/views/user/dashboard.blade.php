@@ -290,43 +290,29 @@
                 <h2 class="text-3xl font-black text-dark">Kata Mereka 💬</h2>
             </div>
 
-            @if (empty($testimonials) ||
-                    (is_object($testimonials) && method_exists($testimonials, 'isEmpty') && $testimonials->isEmpty()))
-                <div class="max-w-md mx-auto text-center py-6">
-                    <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-comment-dots text-2xl text-gray-300"></i>
-                    </div>
-                    <p class="font-bold text-gray-600 text-sm">Belum ada testimoni</p>
-                    <p class="text-gray-400 text-xs mt-1">Jadilah pelanggan pertama yang berbagi pengalaman!</p>
-                </div>
-            @else
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @php $avatarColors = ['bg-purple-500', 'bg-orange-400', 'bg-emerald-500', 'bg-pink-500', 'bg-blue-500', 'bg-amber-500']; @endphp
-                    @foreach ($testimonials as $t)
-                        <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
-                            <div class="flex gap-1 text-yellow-400 mb-4">
-                                @for ($i = 0; $i < $t->rating; $i++)
-                                    <i class="fa-solid fa-star text-sm"></i>
-                                @endfor
-                                @for ($i = $t->rating; $i < 5; $i++)
-                                    <i class="fa-regular fa-star text-sm text-gray-300"></i>
-                                @endfor
-                            </div>
-                            <p class="text-gray-600 text-sm leading-relaxed mb-6 italic">"{{ $t->message }}"</p>
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-10 h-10 {{ $avatarColors[$loop->index % count($avatarColors)] }} rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                    {{ strtoupper(substr($t->user->name, 0, 1)) }}
-                                </div>
-                                <div>
-                                    <p class="font-bold text-gray-800 text-sm">{{ $t->user->name }}</p>
-                                    <p class="text-gray-400 text-xs">{{ $t->created_at->translatedFormat('d F Y') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
+            @php
+                $avatarColors = [
+                    'bg-purple-500',
+                    'bg-orange-400',
+                    'bg-emerald-500',
+                    'bg-pink-500',
+                    'bg-blue-500',
+                    'bg-amber-500',
+                ];
+                $testimonialItems = collect($testimonials ?? [])
+                    ->values()
+                    ->map(
+                        fn($t, $i) => [
+                            'name' => $t->user->name,
+                            'meta' => $t->created_at->translatedFormat('d F Y'),
+                            'rating' => $t->rating,
+                            'message' => $t->message,
+                            'color' => $avatarColors[$i % count($avatarColors)],
+                        ],
+                    )
+                    ->all();
+            @endphp
+            @include('partials.testimonial-carousel')
 
             {{-- Form testimoni (khusus user login) --}}
             @auth
