@@ -9,6 +9,7 @@ use App\Http\Controllers\User\ShopController;
 use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\OrderController;
+use App\Http\Controllers\User\TestimonialController;
 use App\Http\Controllers\Admin\OrderController as AdminOrder;
 use App\Http\Controllers\Admin\RevenueController as AdminRevenue;
 use App\Http\Controllers\Admin\UserController as AdminUser;
@@ -91,6 +92,10 @@ Route::prefix('user')
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
         Route::post('/orders/{order}/proof', [CheckoutController::class, 'uploadProof'])->name('orders.proof');
+
+        // Testimoni
+        Route::post('/testimoni', [TestimonialController::class, 'store'])->name('testimoni.store');
+        Route::delete('/testimoni', [TestimonialController::class, 'destroy'])->name('testimoni.destroy');
     });
 
 // ── API ──────────────────────────────────────────────────

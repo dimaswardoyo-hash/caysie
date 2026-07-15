@@ -113,9 +113,18 @@
             </div>
 
             {{-- Grid --}}
+            @php
+                $catIcons = [
+                    'kaos' => 'fa-shirt',
+                    'celana' => 'fa-socks',
+                    'jaket' => 'fa-vest',
+                    'aksesoris' => 'fa-glasses',
+                ];
+            @endphp
             <div class="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
 
-                @foreach ([['kaos', '👕', 'purple'], ['celana', '👖', 'orange'], ['jaket', '🧥', 'emerald'], ['aksesoris', '🧢', 'yellow']] as [$cat, $ico, $c])
+                @foreach (['kaos', 'celana', 'jaket', 'aksesoris'] as $cat)
+                    @php $c = ['kaos' => 'purple', 'celana' => 'orange', 'jaket' => 'emerald', 'aksesoris' => 'yellow'][$cat]; @endphp
                     <a href="{{ route('user.shop', ['category' => $cat]) }}"
                         class="group bg-white rounded-2xl py-6 px-4 text-center 
                            border border-gray-100 shadow-sm
@@ -123,8 +132,10 @@
                            hover:-translate-y-1 
                            transition-all duration-300 ease-out">
 
-                        <div class="text-4xl mb-3 transform group-hover:scale-110 transition">
-                            {{ $ico }}
+                        <div
+                            class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-{{ $c }}-50 flex items-center justify-center
+                               group-hover:scale-110 group-hover:bg-{{ $c }}-100 transition-all duration-300">
+                            <i class="fa-solid {{ $catIcons[$cat] }} text-{{ $c }}-600 text-xl"></i>
                         </div>
 
                         <p
@@ -278,59 +289,173 @@
                 <p class="text-primary font-bold text-sm tracking-widest mb-2">TESTIMONI</p>
                 <h2 class="text-3xl font-black text-dark">Kata Mereka 💬</h2>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @php
-                    $testimonials = [
-                        [
-                            'name' => 'Andi R.',
-                            'loc' => 'Wonosari',
-                            'rating' => 5,
-                            'color' => 'bg-purple-500',
-                            'text' =>
-                                'Kualitasnya bagus banget, bahan adem dan jahitannya rapi. Sudah beli 3x dan selalu puas. Recommended banget!',
-                        ],
-                        [
-                            'name' => 'Sari D.',
-                            'loc' => 'Semanu',
-                            'rating' => 5,
-                            'color' => 'bg-orange-400',
-                            'text' =>
-                                'Pengiriman cepat, packing aman. Kaosnya sesuai gambar, warnanya juga bagus. Pasti bakal order lagi!',
-                        ],
-                        [
-                            'name' => 'Rizky P.',
-                            'loc' => 'Playen',
-                            'rating' => 4,
-                            'color' => 'bg-emerald-500',
-                            'text' =>
-                                'Harga terjangkau tapi kualitas gak kalah sama brand mahal. Celana joggernya enak banget dipake nongki.',
-                        ],
-                    ];
-                @endphp
-                @foreach ($testimonials as $t)
-                    <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
-                        <div class="flex gap-1 text-yellow-400 mb-4">
-                            @for ($i = 0; $i < $t['rating']; $i++)
-                                <i class="fa-solid fa-star text-sm"></i>
-                            @endfor
-                            @for ($i = $t['rating']; $i < 5; $i++)
-                                <i class="fa-regular fa-star text-sm text-gray-300"></i>
-                            @endfor
-                        </div>
-                        <p class="text-gray-600 text-sm leading-relaxed mb-6 italic">"{{ $t['text'] }}"</p>
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 {{ $t['color'] }} rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                {{ strtoupper(substr($t['name'], 0, 1)) }}
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-800 text-sm">{{ $t['name'] }}</p>
-                                <p class="text-gray-400 text-xs">{{ $t['loc'] }}, Gunungkidul</p>
-                            </div>
-                        </div>
+
+            @if (empty($testimonials) ||
+                    (is_object($testimonials) && method_exists($testimonials, 'isEmpty') && $testimonials->isEmpty()))
+                <div class="max-w-md mx-auto text-center py-6">
+                    <div class="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-comment-dots text-2xl text-gray-300"></i>
                     </div>
-                @endforeach
-            </div>
+                    <p class="font-bold text-gray-600 text-sm">Belum ada testimoni</p>
+                    <p class="text-gray-400 text-xs mt-1">Jadilah pelanggan pertama yang berbagi pengalaman!</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @php $avatarColors = ['bg-purple-500', 'bg-orange-400', 'bg-emerald-500', 'bg-pink-500', 'bg-blue-500', 'bg-amber-500']; @endphp
+                    @foreach ($testimonials as $t)
+                        <div class="bg-gray-50 rounded-2xl p-7 border border-gray-100">
+                            <div class="flex gap-1 text-yellow-400 mb-4">
+                                @for ($i = 0; $i < $t->rating; $i++)
+                                    <i class="fa-solid fa-star text-sm"></i>
+                                @endfor
+                                @for ($i = $t->rating; $i < 5; $i++)
+                                    <i class="fa-regular fa-star text-sm text-gray-300"></i>
+                                @endfor
+                            </div>
+                            <p class="text-gray-600 text-sm leading-relaxed mb-6 italic">"{{ $t->message }}"</p>
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 {{ $avatarColors[$loop->index % count($avatarColors)] }} rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {{ strtoupper(substr($t->user->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800 text-sm">{{ $t->user->name }}</p>
+                                    <p class="text-gray-400 text-xs">{{ $t->created_at->translatedFormat('d F Y') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Form testimoni (khusus user login) --}}
+            @auth
+                <div class="max-w-xl mx-auto mt-10 bg-gray-50 border border-gray-100 rounded-2xl p-6">
+                    <h3 class="font-black text-dark text-sm mb-1">
+                        {{ $myTestimonial ? 'Perbarui Testimonimu' : 'Bagikan Pengalamanmu' }}
+                    </h3>
+                    <p class="text-gray-400 text-xs mb-4">
+                        {{ $myTestimonial ? 'Ubah rating atau ulasanmu kapan saja.' : 'Ceritakan pengalaman belanjamu di Caysie.' }}
+                    </p>
+
+                    <form method="POST" action="{{ route('user.testimoni.store') }}" class="space-y-4">
+                        @csrf
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5">Rating</label>
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <div class="flex items-center gap-1" id="testimoni-star-picker"
+                                    onmouseleave="resetTestimoniHover()">
+                                    @php
+                                        $currentRating = (int) old('rating', $myTestimonial->rating ?? 0);
+                                        $ratingLabels = [
+                                            1 => 'Sangat Kurang',
+                                            2 => 'Kurang',
+                                            3 => 'Cukup',
+                                            4 => 'Bagus',
+                                            5 => 'Sangat Bagus',
+                                        ];
+                                    @endphp
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <button type="button" onclick="setTestimoniRating({{ $i }})"
+                                            onmouseenter="previewTestimoniRating({{ $i }})"
+                                            class="testimoni-star text-2xl leading-none transition-transform hover:scale-110 {{ $i <= $currentRating ? 'text-yellow-400' : 'text-gray-300' }}">
+                                            <i class="fa-solid fa-star"></i>
+                                        </button>
+                                    @endfor
+                                </div>
+                                <span id="testimoni-rating-label" class="text-xs font-bold text-gray-500">
+                                    {{ $currentRating > 0 ? $currentRating . '/5 — ' . $ratingLabels[$currentRating] : 'Ketuk bintang untuk memilih rating' }}
+                                </span>
+                            </div>
+                            <input type="hidden" name="rating" id="testimoni-rating-input" value="{{ $currentRating }}">
+                            @error('rating')
+                                <p class="text-xs text-red-500 font-semibold mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="testimoni-message"
+                                class="block text-xs font-bold text-gray-500 mb-1.5">Ulasanmu</label>
+                            <textarea id="testimoni-message" name="message" rows="3" maxlength="500"
+                                placeholder="Ceritakan pengalaman belanjamu di Caysie..."
+                                class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:border-primary transition @error('message') border-red-300 @enderror">{{ old('message', $myTestimonial->message ?? '') }}</textarea>
+                            @error('message')
+                                <p class="text-xs text-red-500 font-semibold mt-1.5">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-black px-6 py-2.5 rounded-xl hover:opacity-90 transition shadow-lg shadow-primary/25">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            {{ $myTestimonial ? 'Perbarui Testimoni' : 'Kirim Testimoni' }}
+                        </button>
+                    </form>
+
+                    @if ($myTestimonial)
+                        <form method="POST" action="{{ route('user.testimoni.destroy') }}"
+                            onsubmit="return confirm('Hapus testimonimu?')" class="mt-2">
+                            @csrf
+                            @method('delete')
+                            <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-600 transition">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Hapus testimoni saya
+                            </button>
+                        </form>
+                    @endif
+                </div>
+
+                @push('scripts')
+                    <script>
+                        const testimoniRatingLabels = {
+                            1: 'Sangat Kurang',
+                            2: 'Kurang',
+                            3: 'Cukup',
+                            4: 'Bagus',
+                            5: 'Sangat Bagus',
+                        };
+
+                        function paintTestimoniStars(n) {
+                            document.querySelectorAll('.testimoni-star').forEach((el, idx) => {
+                                el.classList.toggle('text-yellow-400', idx < n);
+                                el.classList.toggle('text-gray-300', idx >= n);
+                            });
+                        }
+
+                        function updateTestimoniLabel(n) {
+                            const label = document.getElementById('testimoni-rating-label');
+                            if (!label) return;
+                            label.textContent = n > 0 ? `${n}/5 — ${testimoniRatingLabels[n]}` : 'Ketuk bintang untuk memilih rating';
+                        }
+
+                        function setTestimoniRating(n) {
+                            document.getElementById('testimoni-rating-input').value = n;
+                            paintTestimoniStars(n);
+                            updateTestimoniLabel(n);
+                        }
+
+                        function previewTestimoniRating(n) {
+                            paintTestimoniStars(n);
+                            updateTestimoniLabel(n);
+                        }
+
+                        function resetTestimoniHover() {
+                            const current = parseInt(document.getElementById('testimoni-rating-input')?.value || 0);
+                            paintTestimoniStars(current);
+                            updateTestimoniLabel(current);
+                        }
+                    </script>
+                @endpush
+            @else
+                <div class="max-w-md mx-auto mt-10 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
+                    <i class="fa-solid fa-comment-dots text-primary text-2xl mb-3"></i>
+                    <p class="font-bold text-gray-700 text-sm mb-1">Punya pengalaman belanja di Caysie?</p>
+                    <p class="text-gray-400 text-xs mb-4">Masuk terlebih dahulu untuk membagikan testimonimu.</p>
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-dark text-white text-sm font-black px-6 py-2.5 rounded-xl hover:opacity-90 transition shadow-lg shadow-primary/25">
+                        <i class="fa-solid fa-right-to-bracket"></i> Masuk untuk Memberi Testimoni
+                    </a>
+                </div>
+            @endauth
         </div>
     </section>
 
