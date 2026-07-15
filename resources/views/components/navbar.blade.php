@@ -337,6 +337,16 @@
                                     @endif
                                 </div>
                             </a>
+                            <a href="{{ route('profile.edit') }}"
+                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition group">
+                                <span
+                                    class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center
+                                         group-hover:bg-purple-100 transition">
+                                    <i
+                                        class="fa-solid fa-user-pen text-gray-500 group-hover:text-primary text-xs transition"></i>
+                                </span>
+                                <span class="text-sm font-semibold text-gray-700">Edit Profil</span>
+                            </a>
                         </div>
 
                         {{-- Logout --}}
@@ -421,6 +431,12 @@
                         </span>
                     @endif
                 </div>
+            </a>
+            <a href="{{ route('profile.edit') }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                      {{ request()->routeIs('profile.edit') ? 'bg-primary/10 text-primary' : 'text-gray-600 hover:bg-gray-50' }}">
+                <i class="fa-solid fa-user-pen text-sm w-4"></i>
+                <span class="text-sm font-semibold">Edit Profil</span>
             </a>
             <div class="pt-2 border-t border-gray-100">
                 <form method="POST" action="{{ route('logout') }}">
