@@ -106,7 +106,8 @@
                 <select name="sort"
                     class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 focus:outline-none focus:border-primary transition">
                     <option value="">Terbaru</option>
-                    <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Harga Terendah</option>
+                    <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Harga Terendah
+                    </option>
                     <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Harga Tertinggi
                     </option>
                 </select>
@@ -123,17 +124,25 @@
             </form>
 
             {{-- Quick category chips --}}
+            @php
+                $catIcons = [
+                    'kaos' => 'fa-shirt',
+                    'celana' => 'fa-socks',
+                    'jaket' => 'fa-vest',
+                    'aksesoris' => 'fa-glasses',
+                ];
+            @endphp
             <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
                 <a href="{{ route('user.shop', request()->except(['category', 'page'])) }}"
-                    class="px-3.5 py-1.5 rounded-full text-xs font-bold transition
+                    class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition
                       {{ !request('category') ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}">
-                    Semua
+                    <i class="fa-solid fa-shapes"></i> Semua
                 </a>
                 @foreach (['kaos', 'celana', 'jaket', 'aksesoris'] as $cat)
                     <a href="{{ route('user.shop', array_merge(request()->except(['category', 'page']), ['category' => $cat])) }}"
-                        class="px-3.5 py-1.5 rounded-full text-xs font-bold transition
+                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition
                       {{ request('category') === $cat ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-gray-100 text-gray-500 hover:bg-gray-200' }}">
-                        {{ ucfirst($cat) }}
+                        <i class="fa-solid {{ $catIcons[$cat] }}"></i> {{ ucfirst($cat) }}
                     </a>
                 @endforeach
             </div>
