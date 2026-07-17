@@ -13,6 +13,7 @@ use App\Http\Controllers\User\TestimonialController;
 use App\Http\Controllers\Admin\OrderController as AdminOrder;
 use App\Http\Controllers\Admin\RevenueController as AdminRevenue;
 use App\Http\Controllers\Admin\UserController as AdminUser;
+use App\Http\Controllers\Admin\TestimonialController as AdminTestimonial;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\OngkirController;
 use App\Http\Controllers\Api\LocationController;
@@ -60,6 +61,12 @@ Route::prefix('admin')
         Route::get('users', [AdminUser::class, 'index'])->name('users.index');
         Route::get('users/{user}', [AdminUser::class, 'show'])->name('users.show');
         Route::patch('users/{user}/toggle-ban', [AdminUser::class, 'toggleBan'])->name('users.toggle-ban');
+
+        // Testimoni
+        Route::get('testimonials', [AdminTestimonial::class, 'index'])->name('testimonials.index');
+        Route::patch('testimonials/{testimonial}/toggle', [AdminTestimonial::class, 'toggleApprove'])->name('testimonials.toggle');
+        Route::put('testimonials/{testimonial}', [AdminTestimonial::class, 'update'])->name('testimonials.update');
+        Route::delete('testimonials/{testimonial}', [AdminTestimonial::class, 'destroy'])->name('testimonials.destroy');
     });
 
 // ── USER ─────────────────────────────────────────────────

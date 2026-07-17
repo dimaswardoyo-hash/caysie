@@ -102,6 +102,12 @@
               flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
                     <i class="fa-solid fa-users w-5"></i><span>Kelola User</span>
                 </a>
+
+                <a href="{{ route('admin.testimonials.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.testimonials.*') ? 'active' : '' }}
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-comment-dots w-5"></i><span>Testimoni</span>
+                </a>
             </nav>
 
             {{-- User Info --}}
