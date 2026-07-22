@@ -235,7 +235,7 @@ class BiteshipService
     private function headers(): array
     {
         return [
-            'Authorization' => 'Biteship ' . $this->apiKey,
+            'Authorization' => $this->apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
