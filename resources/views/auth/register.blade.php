@@ -19,6 +19,34 @@
             {{-- Card --}}
             <div class="bg-white border border-gray-100 rounded-3xl shadow-sm shadow-gray-100 p-7 md:p-8">
 
+                {{-- Google login error --}}
+                @if (session('error'))
+                    <div
+                        class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm font-semibold px-4 py-3 rounded-xl mb-5">
+                        <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                {{-- Google Signup --}}
+                <a href="{{ route('auth.google.redirect') }}"
+                    class="w-full flex items-center justify-center gap-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-bold py-2.5 rounded-xl hover:bg-gray-50 transition shadow-sm">
+                    <svg class="w-4.5 h-4.5" style="width:18px;height:18px" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.42 3.58v2.98h3.93c2.3-2.12 3.51-5.24 3.51-8.8z" />
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.92l-3.93-2.98c-1.09.73-2.48 1.16-4 1.16-3.08 0-5.68-2.08-6.6-4.87H1.36v3.06C3.33 21.3 7.36 24 12 24z" />
+                        <path fill="#FBBC05" d="M5.4 14.39c-.24-.73-.38-1.5-.38-2.29s.14-1.56.38-2.29V6.75H1.36A11.97 11.97 0 000 12.1c0 1.94.46 3.77 1.36 5.35l4.04-3.06z" />
+                        <path fill="#EA4335" d="M12 4.75c1.76 0 3.35.61 4.6 1.79l3.45-3.45C17.94 1.2 15.24 0 12 0 7.36 0 3.33 2.7 1.36 6.75l4.04 3.06c.92-2.79 3.52-4.87 6.6-4.87z" />
+                    </svg>
+                    Daftar dengan Google
+                </a>
+
+                {{-- Divider --}}
+                <div class="flex items-center gap-3 my-5">
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                    <span class="text-xs font-semibold text-gray-400">atau daftar dengan email</span>
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
+
                 <form method="POST" action="{{ route('register') }}" class="space-y-4">
                     @csrf
 
