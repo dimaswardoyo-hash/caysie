@@ -194,16 +194,49 @@ class BiteshipService
         }
     }
 
-    // ── Tracking ─────────────────────────────────────────
+    // ── Tracking (publik: waybill milik kurir mana pun) ───
+    // Endpoint resmi: GET /v1/trackings/{waybill_id}/couriers/{courier_code}
+    // (courier_code adalah bagian path, BUKAN query param)
     public function trackPackage(string $courierCode, string $waybillId): array
     {
         try {
-            $res = $this->get("/v1/trackings/{$waybillId}", [
-                'courier' => strtolower($courierCode),
-            ]);
+            $res = $this->get("/v1/trackings/{$waybillId}/couriers/" . strtolower($courierCode));
             $json = $res->json();
-            return $json['success'] ?? false ? $json : ['error' => $json['error'] ?? 'Tidak ditemukan'];
+
+            Log::info('[Biteship] trackPackage (public)', [
+                'waybill' => $waybillId,
+                'courier' => $courierCode,
+                'status' => $res->status(),
+                'success' => $json['success'] ?? null,
+            ]);
+
+            return $json['success'] ?? false ? $json : ['error' => $json['error'] ?? 'Resi tidak ditemukan'];
         } catch (\Exception $e) {
+            Log::error('[Biteship] trackPackage exception: ' . $e->getMessage());
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    // ── Tracking (privat: order yang KITA buat lewat createOrder()) ──
+    // Lebih diandalkan daripada trackPackage() di atas, terutama saat
+    // testing mode — karena Biteship tahu persis status order miliknya
+    // sendiri (termasuk data simulasi di sandbox), tanpa bergantung pada
+    // sistem tracking asli kurir yang belum tentu mengenali resi dummy.
+    public function trackByOrderId(string $biteshipOrderId): array
+    {
+        try {
+            $res = $this->get("/v1/trackings/{$biteshipOrderId}");
+            $json = $res->json();
+
+            Log::info('[Biteship] trackByOrderId (private)', [
+                'biteship_order_id' => $biteshipOrderId,
+                'status' => $res->status(),
+                'success' => $json['success'] ?? null,
+            ]);
+
+            return $json['success'] ?? false ? $json : ['error' => $json['error'] ?? 'Order tidak ditemukan'];
+        } catch (\Exception $e) {
+            Log::error('[Biteship] trackByOrderId exception: ' . $e->getMessage());
             return ['error' => $e->getMessage()];
         }
     }
