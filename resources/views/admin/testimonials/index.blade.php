@@ -3,14 +3,6 @@
 
 @section('content')
 
-    {{-- Alert --}}
-    @if (session('success'))
-        <div class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-2xl">
-            <i class="fa-solid fa-circle-check text-green-500 text-lg"></i>
-            <span class="font-semibold text-sm">{{ session('success') }}</span>
-        </div>
-    @endif
-
     {{-- Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <div class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-gray-100">
@@ -52,7 +44,9 @@
 
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <p class="text-sm text-gray-400">Total {{ is_object($testimonials) && method_exists($testimonials, 'total') ? $testimonials->total() : count($testimonials) }} testimoni</p>
+        <p class="text-sm text-gray-400">Total
+            {{ is_object($testimonials) && method_exists($testimonials, 'total') ? $testimonials->total() : count($testimonials) }}
+            testimoni</p>
     </div>
 
     {{-- Filters --}}

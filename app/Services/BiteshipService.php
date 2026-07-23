@@ -11,6 +11,13 @@ class BiteshipService
     private string $baseUrl;
     private string $originPostalCode;
 
+    // Diset true kalau request TERAKHIR ke Biteship kena 401 (API key
+    // tidak valid/expired/config:cache belum di-clear setelah ganti .env).
+    // Dicek oleh caller (OngkirController, Admin\OrderController) supaya
+    // pesan error yang ditampilkan ke user/admin tidak menyesatkan —
+    // "kurir tidak tersedia" itu beda arti dengan "key kita bermasalah".
+    public bool $lastRequestUnauthorized = false;
+
     public function __construct()
     {
         $this->apiKey = config('services.biteship.api_key');
@@ -21,6 +28,8 @@ class BiteshipService
     // ── Search lokasi ────────────────────────────────────
     public function searchLocation(string $keyword): array
     {
+        $this->lastRequestUnauthorized = false;
+
         if (empty($this->apiKey)) {
             Log::error('[Biteship] API Key kosong! Cek .env BITESHIP_API_KEY');
             return [];
@@ -46,6 +55,7 @@ class BiteshipService
 
             // Jika 401 → API key salah
             if ($res->status() === 401) {
+                $this->lastRequestUnauthorized = true;
                 Log::error('[Biteship] 401 Unauthorized — cek API key');
                 return [];
             }
@@ -143,6 +153,8 @@ class BiteshipService
     // ── Cek ongkir ───────────────────────────────────────
     public function getRates(string $destinationAreaId, int $weightGram, string $couriers = 'anteraja,jne,jnt,sicepat,pos,tiki,ninja,lion,sap,id_express'): array
     {
+        $this->lastRequestUnauthorized = false;
+
         if (empty($this->apiKey)) {
             Log::error('[Biteship] API Key kosong!');
             return [];
@@ -178,6 +190,7 @@ class BiteshipService
             ]);
 
             if ($res->status() === 401) {
+                $this->lastRequestUnauthorized = true;
                 Log::error('[Biteship] 401 Unauthorized — cek API key');
                 return [];
             }

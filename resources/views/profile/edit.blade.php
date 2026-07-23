@@ -29,23 +29,6 @@
             </div>
         </div>
 
-        {{-- ===================== FLASH STATUS ===================== --}}
-        @php
-            $statusMessages = [
-                'profile-updated' => ['Profil kamu berhasil diperbarui.', 'green'],
-                'password-updated' => ['Kata sandi kamu berhasil diperbarui.', 'green'],
-                'verification-link-sent' => ['Link verifikasi baru telah dikirim ke email kamu.', 'blue'],
-            ];
-            $statusInfo = $statusMessages[session('status')] ?? null;
-        @endphp
-        @if ($statusInfo)
-            <div
-                class="flex items-center gap-3 bg-{{ $statusInfo[1] }}-50 border border-{{ $statusInfo[1] }}-200 text-{{ $statusInfo[1] }}-700 px-5 py-3.5 rounded-2xl mb-6">
-                <i class="fa-solid fa-circle-check text-{{ $statusInfo[1] }}-500"></i>
-                <span class="text-sm font-semibold">{{ $statusInfo[0] }}</span>
-            </div>
-        @endif
-
         <div class="space-y-6">
             {{-- INFORMASI PROFIL --}}
             <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 shadow-sm shadow-gray-100">

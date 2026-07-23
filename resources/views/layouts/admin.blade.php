@@ -44,6 +44,9 @@
 
 <body class="bg-gray-100 font-sans">
 
+    {{-- Flash Messages (popup, auto-dismiss, konsisten untuk success/error/warning/status) --}}
+    @include('components.flash-toast')
+
     <div class="flex h-screen overflow-hidden">
 
         {{-- SIDEBAR --}}

@@ -3,13 +3,6 @@
 
 @section('content')
 
-    @if (session('success'))
-        <div class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-2xl">
-            <i class="fa-solid fa-circle-check text-green-500"></i>
-            <span class="font-semibold text-sm">{{ session('success') }}</span>
-        </div>
-    @endif
-
     {{-- Status Tabs --}}
     @php
         $tabColors = [

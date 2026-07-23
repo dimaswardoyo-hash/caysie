@@ -14,14 +14,6 @@
                 <p class="text-gray-500 text-sm mt-1">Pesanan <strong>{{ $order->order_number }}</strong></p>
             </div>
 
-            {{-- Warning flash --}}
-            @if (session('warning'))
-                <div class="bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4 mb-6 flex items-start gap-3">
-                    <i class="fa-solid fa-triangle-exclamation text-yellow-500 mt-0.5 flex-shrink-0"></i>
-                    <p class="text-sm text-yellow-800 font-semibold">{{ session('warning') }}</p>
-                </div>
-            @endif
-
             {{-- Status Card --}}
             <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden mb-6">
 

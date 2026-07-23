@@ -3,14 +3,6 @@
 
 @section('content')
 
-    {{-- Alert --}}
-    @if (session('success'))
-        <div class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-2xl">
-            <i class="fa-solid fa-circle-check text-green-500 text-lg"></i>
-            <span class="font-semibold text-sm">{{ session('success') }}</span>
-        </div>
-    @endif
-
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>

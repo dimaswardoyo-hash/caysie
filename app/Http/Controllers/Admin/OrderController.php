@@ -56,9 +56,11 @@ class OrderController extends Controller
         $areas = $this->biteship->resolveAreaId(city: $order->receiver_city, district: $order->receiver_district ?? '', postalCode: $order->receiver_postal_code ?? '');
 
         if (empty($areas)) {
+            $message = $this->biteship->lastRequestUnauthorized ? 'Gagal menghubungi Biteship: API key tidak valid/expired. Cek BITESHIP_API_KEY di .env, lalu jalankan `php artisan config:clear`.' : 'Area tujuan tidak ditemukan di Biteship. Coba cek manual, atau isi resi secara manual di form "Update Status".';
+
             return response()->json([
                 'success' => false,
-                'message' => 'Area tujuan tidak ditemukan di Biteship. Coba cek manual, atau isi resi secara manual di form "Update Status".',
+                'message' => $message,
             ]);
         }
 
@@ -74,9 +76,11 @@ class OrderController extends Controller
         $rates = $this->biteship->getRates($request->area_id, $weight);
 
         if (empty($rates)) {
+            $message = $this->biteship->lastRequestUnauthorized ? 'Gagal menghubungi Biteship: API key tidak valid/expired. Cek BITESHIP_API_KEY di .env, lalu jalankan `php artisan config:clear`.' : 'Tidak ada kurir yang tersedia untuk area ini.';
+
             return response()->json([
                 'success' => false,
-                'message' => 'Tidak ada kurir yang tersedia untuk area ini.',
+                'message' => $message,
             ]);
         }
 
