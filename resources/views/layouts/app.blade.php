@@ -138,6 +138,10 @@
 
     {{-- ===================== FOOTER ===================== --}}
     @include('components.footer')
+
+    {{-- ===================== CHAT WIDGET ===================== --}}
+    @include('components.chat-widget')
+
     <script>
         // ── Toggle Dropdown ──────────────────────────────────────
         function toggleDropdown(id) {
@@ -192,7 +196,7 @@
         // ── Auto-dismiss flash message ────────────────────────────
         setTimeout(() => {
             document.querySelectorAll('[class*="bg-green-50"], [class*="bg-red-50"]').forEach(el => {
-                if (el.closest('nav, footer')) return;
+                if (el.closest('nav, footer, #chat-widget')) return;
                 el.style.transition = 'opacity .5s';
                 el.style.opacity = '0';
                 setTimeout(() => el.remove(), 500);

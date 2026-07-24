@@ -111,6 +111,19 @@
               flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
                     <i class="fa-solid fa-comment-dots w-5"></i><span>Testimoni</span>
                 </a>
+
+                <a href="{{ route('admin.chat.index') }}"
+                    class="sidebar-link {{ request()->routeIs('admin.chat.*') ? 'active' : '' }}
+              flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:text-white transition">
+                    <i class="fa-solid fa-headset w-5"></i><span>Chat</span>
+                    @php $unreadChat = \App\Models\ChatMessage::where('sender', 'user')->unread()->visibleToAdmin()->count(); @endphp
+                    @if ($unreadChat > 0)
+                        <span
+                            class="ml-auto bg-red-500 text-white text-xs font-black w-5 h-5 rounded-full flex items-center justify-center">
+                            {{ $unreadChat > 9 ? '9+' : $unreadChat }}
+                        </span>
+                    @endif
+                </a>
             </nav>
 
             {{-- User Info --}}

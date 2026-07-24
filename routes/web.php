@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\OrderController as AdminOrder;
 use App\Http\Controllers\Admin\RevenueController as AdminRevenue;
 use App\Http\Controllers\Admin\UserController as AdminUser;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonial;
+use App\Http\Controllers\Admin\AdminChatController as AdminChat;
+use App\Http\Controllers\User\ChatController as UserChat;
 use App\Http\Controllers\Api\WilayahController;
 use App\Http\Controllers\Api\OngkirController;
 use App\Http\Controllers\Api\LocationController;
@@ -67,6 +69,14 @@ Route::prefix('admin')
         Route::patch('testimonials/{testimonial}/toggle', [AdminTestimonial::class, 'toggleApprove'])->name('testimonials.toggle');
         Route::put('testimonials/{testimonial}', [AdminTestimonial::class, 'update'])->name('testimonials.update');
         Route::delete('testimonials/{testimonial}', [AdminTestimonial::class, 'destroy'])->name('testimonials.destroy');
+
+        // Chat
+        Route::get('chat', [AdminChat::class, 'index'])->name('chat.index');
+        Route::get('chat/unread-count', [AdminChat::class, 'unreadCount'])->name('chat.unread-count');
+        Route::get('chat/{user}', [AdminChat::class, 'show'])->name('chat.show');
+        Route::get('chat/{user}/messages', [AdminChat::class, 'messages'])->name('chat.messages');
+        Route::post('chat/{user}/send', [AdminChat::class, 'send'])->name('chat.send');
+        Route::delete('chat/{user}', [AdminChat::class, 'destroy'])->name('chat.destroy');
     });
 
 // ── USER ─────────────────────────────────────────────────
@@ -103,6 +113,11 @@ Route::prefix('user')
         // Testimoni
         Route::post('/testimoni', [TestimonialController::class, 'store'])->name('testimoni.store');
         Route::delete('/testimoni', [TestimonialController::class, 'destroy'])->name('testimoni.destroy');
+
+        // Chat widget (popup, polling)
+        Route::get('/chat/messages', [UserChat::class, 'messages'])->name('chat.messages');
+        Route::post('/chat/send', [UserChat::class, 'send'])->name('chat.send');
+        Route::delete('/chat', [UserChat::class, 'destroy'])->name('chat.destroy');
     });
 
 // ── API ──────────────────────────────────────────────────

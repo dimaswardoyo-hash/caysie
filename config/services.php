@@ -61,6 +61,11 @@ return [
         'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
     ],
 
+    'whatsapp' => [
+        // Format: 62xxxxxxxxxx (kode negara, tanpa + atau 0 di depan)
+        'admin_number' => env('ADMIN_WHATSAPP_NUMBER'),
+    ],
+
     'biteship' => [
         'api_key' => env('BITESHIP_API_KEY'),
         'base_url' => env('BITESHIP_BASE_URL', 'https://api.biteship.com'),
