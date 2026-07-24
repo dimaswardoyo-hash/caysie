@@ -5,23 +5,26 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\XenditService;
-use App\Models\Order;
+use App\Jobs\ProcessXenditWebhook;
 use Illuminate\Support\Facades\Log;
 
 class XenditWebhookController extends Controller
 {
-    public function __construct(private XenditService $xendit)
-    {
-    }
+    public function __construct(private XenditService $xendit) {}
 
     /**
      * Xendit mengirim POST ke endpoint ini setiap ada perubahan status pembayaran.
      * Endpoint ini TIDAK boleh pakai middleware 'auth' — Xendit tidak login.
      * Tapi harus diverifikasi via X-CALLBACK-TOKEN.
+     *
+     * PENTING: handler ini HARUS tetap cepat & synchronous hanya untuk verifikasi.
+     * Update status order (efek samping: kirim notif, dsb) dilempar ke queue supaya
+     * Xendit langsung dapat respons 200 dan tidak retry berkali-kali kalau proses
+     * di sisi kita lambat.
      */
     public function handle(Request $request)
     {
-        // 1. Verifikasi token
+        // 1. Verifikasi token — wajib synchronous, ini garis pertahanan keamanan.
         $callbackToken = $request->header('x-callback-token') ?? '';
 
         if (!$this->xendit->verifyWebhook($callbackToken)) {
@@ -34,68 +37,19 @@ class XenditWebhookController extends Controller
 
         $payload = $request->all();
 
-        Log::info('[Xendit Webhook] Diterima', [
-            'external_id' => $payload['external_id'] ?? null,
-            'status' => $payload['status'] ?? null,
-        ]);
-
-        // 2. Cari order berdasarkan external_id (= order_number kita)
-        $externalId = $payload['external_id'] ?? null;
-        if (!$externalId) {
+        // 2. Validasi dasar sebelum masuk antrian (fail fast, hemat job sia-sia)
+        if (empty($payload['external_id'])) {
             return response()->json(['message' => 'No external_id'], 400);
         }
 
-        $order = Order::where('order_number', $externalId)->first();
-        if (!$order) {
-            Log::warning('[Xendit Webhook] Order tidak ditemukan', ['external_id' => $externalId]);
-            return response()->json(['message' => 'Order not found'], 404);
-        }
+        Log::info('[Xendit Webhook] Diterima, dimasukkan ke antrian', [
+            'external_id' => $payload['external_id'],
+            'status' => $payload['status'] ?? null,
+        ]);
 
-        // 3. Update status order sesuai status Xendit
-        $xenditStatus = strtoupper($payload['status'] ?? '');
-
-        match ($xenditStatus) {
-            'PAID' => $this->markPaid($order, $payload),
-            'EXPIRED' => $this->markExpired($order),
-            default => Log::info("[Xendit Webhook] Status tidak ditangani: {$xenditStatus}"),
-        };
+        // 3. Lempar ke queue — controller selesai di sini, respons langsung dikirim.
+        ProcessXenditWebhook::dispatch($payload);
 
         return response()->json(['message' => 'OK']);
-    }
-
-    private function markPaid(Order $order, array $payload): void
-    {
-        if ($order->status === 'pending') {
-            $order->update([
-                'status' => 'confirmed',
-                'paid_at' => now(),
-                'payment_method' => $payload['payment_method'] ?? null,
-                'payment_channel' => $payload['payment_channel'] ?? null,
-            ]);
-
-            Log::info('[Xendit Webhook] Order PAID', [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-                'payment_method' => $payload['payment_method'] ?? null,
-            ]);
-        }
-    }
-
-    private function markExpired(Order $order): void
-    {
-        if ($order->status === 'pending') {
-            $order->restoreStock();
-            $order->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-                'cancel_reason' => 'Invoice Xendit kedaluwarsa.',
-                'cancelled_by' => 'system',
-            ]);
-
-            Log::info('[Xendit Webhook] Order EXPIRED/dibatalkan', [
-                'order_id' => $order->id,
-                'order_number' => $order->order_number,
-            ]);
-        }
     }
 }
