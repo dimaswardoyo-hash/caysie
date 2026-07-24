@@ -43,8 +43,9 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-600 mb-1.5">Kategori <span
                                         class="text-red-500">*</span></label>
-                                <select name="category" required
-                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary transition">
+                                <select name="category" id="category-select" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-primary transition"
+                                    onchange="toggleSizeOptionsByCategory(this.value)">
                                     @foreach ($categories as $cat)
                                         <option value="{{ $cat }}"
                                             {{ old('category', $product->category) === $cat ? 'selected' : '' }}>
@@ -112,12 +113,14 @@
                         @php $existingSizes = $product->sizes->keyBy('size'); @endphp
                         @foreach ($sizes as $i => $size)
                             @php $existing = $existingSizes->get($size); @endphp
-                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <div class="size-item flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100"
+                                data-size="{{ $size }}">
                                 <label class="flex items-center gap-3 cursor-pointer flex-1">
                                     <input type="checkbox" name="sizes[{{ $i }}][size]"
                                         value="{{ $size }}" class="w-5 h-5 rounded accent-primary"
                                         {{ $existing ? 'checked' : '' }} onchange="toggleStockInput(this)">
-                                    <span class="font-bold text-gray-700 text-sm w-12">{{ $size }}</span>
+                                    <span
+                                        class="font-bold text-gray-700 text-sm w-20 whitespace-nowrap">{{ $size }}</span>
                                 </label>
                                 <div class="flex items-center gap-2 flex-1">
                                     <label class="text-xs text-gray-400 w-10">Stok:</label>
@@ -267,5 +270,32 @@
             if (!checkbox.checked) stockInput.value = 0;
             else stockInput.focus();
         }
+
+        // 'One Size' hanya relevan untuk kategori Aksesoris — sama seperti di
+        // form tambah produk. Item ukuran yang tidak relevan disembunyikan
+        // dan checkbox-nya di-uncheck supaya tidak ikut ter-submit diam-diam.
+        function toggleSizeOptionsByCategory(category) {
+            document.querySelectorAll('.size-item').forEach(item => {
+                const isOneSizeItem = item.dataset.size === 'One Size';
+                const shouldShow = category === 'aksesoris' ? isOneSizeItem : !isOneSizeItem;
+
+                item.classList.toggle('hidden', !shouldShow);
+
+                if (!shouldShow) {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    const stockInput = item.querySelector('.stock-input');
+                    checkbox.checked = false;
+                    stockInput.disabled = true;
+                    stockInput.value = 0;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentCategory = document.getElementById('category-select').value;
+            if (currentCategory) {
+                toggleSizeOptionsByCategory(currentCategory);
+            }
+        });
     </script>
 @endpush

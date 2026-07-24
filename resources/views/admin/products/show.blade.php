@@ -232,7 +232,7 @@
 
             @php
                 $maxStock = $product->sizes->max('stock') ?: 1;
-                $allSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+                $allSizes = $product->category === 'aksesoris' ? ['One Size'] : ['S', 'M', 'L', 'XL', 'XXL'];
             @endphp
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    private array $sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+    private array $sizes = ['S', 'M', 'L', 'XL', 'XXL', 'One Size'];
     private array $categories = ['kaos', 'celana', 'jaket', 'aksesoris'];
 
     // ── INDEX ────────────────────────────────────────────
@@ -60,7 +60,13 @@ class ProductController extends Controller
                 'is_featured' => 'boolean',
                 'is_active' => 'boolean',
                 'sizes' => 'required|array|min:1',
-                'sizes.*.size' => 'required|in:' . implode(',', $this->sizes),
+                'sizes.*.size' => [
+                    'required',
+                    'in:' . implode(',', $this->sizes),
+                    function ($attribute, $value, $fail) use ($request) {
+                        $this->validateSizeMatchesCategory($value, $request->input('category'), $fail);
+                    },
+                ],
                 'sizes.*.stock' => 'required|integer|min:0',
             ],
             [
@@ -143,7 +149,13 @@ class ProductController extends Controller
                 'is_featured' => 'boolean',
                 'is_active' => 'boolean',
                 'sizes' => 'required|array|min:1',
-                'sizes.*.size' => 'required|in:' . implode(',', $this->sizes),
+                'sizes.*.size' => [
+                    'required',
+                    'in:' . implode(',', $this->sizes),
+                    function ($attribute, $value, $fail) use ($request) {
+                        $this->validateSizeMatchesCategory($value, $request->input('category'), $fail);
+                    },
+                ],
                 'sizes.*.stock' => 'required|integer|min:0',
             ],
             [
@@ -230,5 +242,22 @@ class ProductController extends Controller
         $product->update(['is_active' => !$product->is_active]);
         $label = $product->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Produk berhasil {$label}.");
+    }
+
+    /**
+     * 'One Size' hanya valid untuk kategori aksesoris; kategori lain
+     * (kaos/celana/jaket) wajib pakai ukuran reguler S-XXL. Ini jaga-jaga
+     * di server kalau ada yang submit form tanpa lewat toggle JS di
+     * create/edit blade.
+     */
+    private function validateSizeMatchesCategory(string $size, ?string $category, \Closure $fail): void
+    {
+        if ($size === 'One Size' && $category !== 'aksesoris') {
+            $fail('Ukuran "One Size" hanya berlaku untuk kategori Aksesoris.');
+        }
+
+        if ($size !== 'One Size' && $category === 'aksesoris') {
+            $fail('Kategori Aksesoris hanya boleh menggunakan ukuran "One Size".');
+        }
     }
 }
